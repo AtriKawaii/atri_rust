@@ -1,6 +1,6 @@
 [package]
 name = "atri_ffi"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 authors = ["LaoLittle"]
 description = "AtriBot FFI structs"
@@ -10,7 +10,7 @@ keywords = [
     "FFI",
     "oicq"
 ]
-license = "AGPL-3.0"
+license = "MIT"
 homepage = "https://github.com/LaoLittle/atri_bot"
 repository = "https://github.com/LaoLittle/atri_bot"
 
