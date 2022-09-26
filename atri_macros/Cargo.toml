@@ -1,9 +1,9 @@
 [package]
 name = "atri_macros"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["LaoLittle"]
-description = "AtriBot plugin macros"
+description = "AtriPlugin macros"
 readme = "README.md"
 keywords = [
     "Atri",
@@ -12,8 +12,8 @@ keywords = [
     "oicq"
 ]
 license = "MIT"
-homepage = "https://github.com/LaoLittle/atri_bot"
-repository = "https://github.com/LaoLittle/atri_bot"
+homepage = "https://atrikawaii.github.io/atri_doc/"
+repository = "https://github.com/AtriKawaii/atri_rust"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

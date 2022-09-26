@@ -1,9 +1,9 @@
 [package]
 name = "atri_ffi"
-version = "0.2.3"
+version = "0.2.4"
 edition = "2021"
 authors = ["LaoLittle"]
-description = "AtriBot FFI structs"
+description = "AtriPlugin FFI structs"
 readme = "README.md"
 keywords = [
     "Atri",
@@ -11,7 +11,7 @@ keywords = [
     "oicq"
 ]
 license = "MIT"
-homepage = "https://github.com/LaoLittle/atri_bot"
-repository = "https://github.com/LaoLittle/atri_bot"
+homepage = "https://atrikawaii.github.io/atri_doc/"
+repository = "https://github.com/AtriKawaii/atri_rust"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

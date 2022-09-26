@@ -1,9 +1,9 @@
 [package]
 name = "atri_plugin"
-version = "0.2.7"
+version = "0.2.8"
 edition = "2021"
 authors = ["LaoLittle"]
-description = "AtriBot plugin"
+description = "AtriPlugin"
 readme = "README.md"
 keywords = [
     "Atri",
@@ -18,9 +18,9 @@ repository = "https://github.com/AtriKawaii/atri_rust"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies.atri_ffi]
-version = "0.2.3"
+version = "0.2.4"
 path = "../atri_ffi"
 
 [dependencies.atri_macros]
-version = "0.1.1"
+version = "0.1.2"
 path = "../atri_macros"
