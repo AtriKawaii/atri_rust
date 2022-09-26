@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "atri_ffi",
+    "atri_macros",
+    "atri_plugin",
+]

@@ -1,2 +1,1 @@
-# atri_rust
-AtriPlugin的Rust实现
+atri_plugin/README.md
