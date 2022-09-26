@@ -56,8 +56,7 @@ impl Plugin for MyPlugin {
 
 也可以为插件实现`Drop`, 将根据规则释放
 
-最后, 将`cargo build`编译得到的动态库放入`AtriBot`的`plugins`文件夹内,
-开启`AtriBot`即可
+最后, 使用`cargo build`编译得到的动态库即为插件本体
 
 详细文档另请参阅本crate源码
 
