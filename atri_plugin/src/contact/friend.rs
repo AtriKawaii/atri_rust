@@ -3,7 +3,6 @@ use crate::error::AtriError;
 use crate::loader::get_plugin_manager_vtb;
 use crate::message::image::Image;
 use crate::message::{MessageChain, MessageReceipt};
-use crate::runtime::manager::PluginManager;
 use atri_ffi::ffi::ForFFI;
 use atri_ffi::{ManagedCloneable, RustVec};
 use std::fmt::{Display, Formatter};
@@ -33,7 +32,7 @@ impl Friend {
             (get_plugin_manager_vtb().friend_send_message)(self.0.pointer, ffi)
         };
 
-        let result = Result::from(PluginManager.spawn(fu).await.unwrap());
+        let result = Result::from(crate::runtime::spawn(fu).await.unwrap());
         match result {
             Ok(ma) => Ok(MessageReceipt(ma)),
             Err(s) => Err(AtriError::RQError(s)),
@@ -43,7 +42,7 @@ impl Friend {
     pub async fn upload_image(&self, img: Vec<u8>) -> Result<Image, AtriError> {
         let fu =
             { (get_plugin_manager_vtb().friend_upload_image)(self.0.pointer, RustVec::from(img)) };
-        let result = PluginManager.spawn(fu).await.unwrap();
+        let result = crate::runtime::spawn(fu).await.unwrap();
 
         match Result::from(result) {
             Ok(ma) => Ok(Image(ma)),

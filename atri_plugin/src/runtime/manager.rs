@@ -4,13 +4,13 @@ use atri_ffi::future::FFIFuture;
 use atri_ffi::Managed;
 use std::future::Future;
 
-pub struct PluginManager;
+pub struct PluginRuntime;
 
-impl PluginManager {
+impl PluginRuntime {
     /// 使用插件共享协程执行器执行协程，返回JoinHandle
     ///
     /// 注意：返回值会经过一次Box装箱拆箱，请避免返回过大的值
-    pub fn spawn<F>(&self, future: F) -> JoinHandle<F::Output>
+    pub fn spawn<F>(future: F) -> JoinHandle<F::Output>
     where
         F: Future,
         F: Send + 'static,
@@ -30,7 +30,7 @@ impl PluginManager {
     /// 阻塞当前线程执行协程，并返回Future的返回值
     ///
     /// 注意：返回值会经过一次Box装箱拆箱，请避免返回过大的值
-    pub fn block_on<F>(&self, future: F) -> F::Output
+    pub fn block_on<F>(future: F) -> F::Output
     where
         F: Future,
     {

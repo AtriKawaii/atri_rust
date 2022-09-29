@@ -1,4 +1,5 @@
 use crate::error::{AtriError, AtriResult};
+use crate::runtime::manager::PluginRuntime;
 use atri_ffi::error::FFIResult;
 use atri_ffi::future::FFIFuture;
 use atri_ffi::Managed;
@@ -7,7 +8,7 @@ use std::marker::PhantomData;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-pub mod manager;
+mod manager;
 
 pub struct JoinHandle<T> {
     handle: FFIFuture<FFIResult<Managed>>,
@@ -24,6 +25,9 @@ impl<T> JoinHandle<T> {
 }
 
 impl<T> Unpin for JoinHandle<T> {}
+
+unsafe impl<T: Send> Send for JoinHandle<T> {}
+unsafe impl<T: Send> Sync for JoinHandle<T> {}
 
 impl<T> Future for JoinHandle<T> {
     type Output = AtriResult<T>;
@@ -42,4 +46,26 @@ impl<T> Future for JoinHandle<T> {
             Poll::Pending => Poll::Pending,
         }
     }
+}
+
+/// 使用插件共享协程执行器执行协程，返回JoinHandle
+///
+/// 注意：返回值会经过一次Box装箱拆箱，请避免返回过大的值
+pub fn spawn<F>(future: F) -> JoinHandle<F::Output>
+where
+    F: Future,
+    F: Send + 'static,
+    F::Output: Send + 'static,
+{
+    PluginRuntime::spawn(future)
+}
+
+/// 阻塞当前线程执行协程，并返回Future的返回值
+///
+/// 注意：返回值会经过一次Box装箱拆箱，请避免返回过大的值
+pub fn block_on<F>(future: F) -> F::Output
+where
+    F: Future,
+{
+    PluginRuntime::block_on(future)
 }

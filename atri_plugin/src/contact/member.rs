@@ -7,7 +7,6 @@ use std::mem::ManuallyDrop;
 use crate::contact::group::Group;
 use crate::error::AtriError;
 use crate::loader::get_plugin_manager_vtb;
-use crate::runtime::manager::PluginManager;
 
 #[derive(Clone)]
 pub enum Member {
@@ -63,7 +62,7 @@ impl NamedMember {
 
         let fu = (get_plugin_manager_vtb().named_member_change_card_name)(self.0.pointer, rs);
 
-        let result = PluginManager.spawn(fu).await.unwrap();
+        let result = crate::runtime::spawn(fu).await.unwrap();
         Result::from(result).map_err(|s| AtriError::RQError(s))
     }
 }
