@@ -7,7 +7,7 @@ use atri_ffi::Managed;
 
 use crate::message::at::At;
 use crate::message::image::Image;
-use crate::message::meta::MessageMetadata;
+use crate::message::meta::{Anonymous, MessageMetadata, Reply};
 use std::slice::Iter;
 use std::{mem, vec};
 
@@ -91,6 +91,8 @@ impl ToString for MessageValue {
 
 #[derive(Default)]
 pub struct MessageChainBuilder {
+    anonymous: Option<Anonymous>,
+    reply: Option<Reply>,
     value: Vec<MessageValue>,
     buf: String,
 }
@@ -160,6 +162,7 @@ impl PushMessage for &str {
 
 impl PushMessage for MessageChainBuilder {
     fn push_to(self, v: &mut Vec<MessageValue>) {
-        v.extend(self.value)
+        let chain = self.build();
+        v.extend(chain.value);
     }
 }
