@@ -38,7 +38,7 @@ impl Plugin for MyPlugin {
                 let mut chain = MessageChainBuilder::new();
                 chain.push_str("321")
                     .push_str("114514");
-                let _ = e.group().send_message(chain.build()).await;
+                let _ = e.group().send_message(chain).await;
             }
         });
         self.listener = Some(guard);
@@ -46,10 +46,6 @@ impl Plugin for MyPlugin {
 
     fn disable(&mut self) {
         info!("Disable my plugin");
-    }
-
-    fn should_drop() -> bool {
-        true
     }
 }
 ```
