@@ -1,5 +1,5 @@
 use crate::loader::get_plugin_manager_vtb;
-use crate::message::{Message, MessageValue};
+use crate::message::{MessageValue, PushMessage};
 use atri_ffi::Managed;
 
 pub struct Image(pub(crate) Managed);
@@ -16,7 +16,7 @@ impl Image {
     }
 }
 
-impl Message for Image {
+impl PushMessage for Image {
     fn push_to(self, v: &mut Vec<MessageValue>) {
         v.push(MessageValue::Image(self));
     }

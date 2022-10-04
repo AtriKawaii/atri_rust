@@ -5,7 +5,8 @@ pub type AtriResult<T> = Result<T, AtriError>;
 #[derive(Debug)]
 pub enum AtriError {
     JoinError(String),
-    RQError(String),
+    ClientError(String),
+    NotSupported,
 }
 
 impl Display for AtriError {

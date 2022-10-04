@@ -18,7 +18,11 @@ pub struct MessageChain {
 }
 
 impl MessageChain {
-    pub fn iter(&self) -> Iter<'_, MessageValue> {
+    pub fn builder() -> MessageChainBuilder {
+        MessageChainBuilder::new()
+    }
+
+    pub fn iter(&self) -> Iter<MessageValue> {
         self.into_iter()
     }
 
@@ -96,7 +100,7 @@ impl MessageChainBuilder {
         Self::default()
     }
 
-    pub fn push<E: Message>(&mut self, elem: E) -> &mut Self {
+    pub fn push<E: PushMessage>(&mut self, elem: E) -> &mut Self {
         self.flush();
         elem.push_to(&mut self.value);
         self
@@ -124,18 +128,38 @@ impl MessageChainBuilder {
 
 pub struct MessageReceipt(pub(crate) Managed);
 
-pub trait Message {
+pub trait PushMessage {
     fn push_to(self, v: &mut Vec<MessageValue>);
 }
 
-impl Message for String {
+impl<M: PushMessage> From<M> for MessageChain {
+    fn from(push: M) -> Self {
+        let mut chain = MessageChain::default();
+        push.push_to(&mut chain.value);
+        chain
+    }
+}
+
+impl PushMessage for MessageValue {
+    fn push_to(self, v: &mut Vec<MessageValue>) {
+        v.push(self);
+    }
+}
+
+impl PushMessage for String {
     fn push_to(self, v: &mut Vec<MessageValue>) {
         v.push(MessageValue::Text(self));
     }
 }
 
-impl Message for At {
+impl PushMessage for &str {
     fn push_to(self, v: &mut Vec<MessageValue>) {
-        v.push(MessageValue::At(self));
+        String::from(self).push_to(v);
+    }
+}
+
+impl PushMessage for MessageChainBuilder {
+    fn push_to(self, v: &mut Vec<MessageValue>) {
+        v.extend(self.value)
     }
 }

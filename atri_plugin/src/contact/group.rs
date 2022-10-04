@@ -56,16 +56,19 @@ impl Group {
         }
     }
 
-    pub async fn send_message(&self, chain: MessageChain) -> Result<MessageReceipt, AtriError> {
+    pub async fn send_message<M: Into<MessageChain>>(
+        &self,
+        chain: M,
+    ) -> Result<MessageReceipt, AtriError> {
         let fu = {
-            let ffi: FFIMessageChain = chain.into_ffi();
+            let ffi: FFIMessageChain = chain.into().into_ffi();
             (get_plugin_manager_vtb().group_send_message)(self.0.pointer, ffi)
         };
 
         let res = crate::runtime::spawn(fu).await.unwrap();
         match Result::from(res) {
             Ok(ma) => Ok(MessageReceipt(ma)),
-            Err(s) => Err(AtriError::RQError(s)),
+            Err(s) => Err(AtriError::ClientError(s)),
         }
     }
 
@@ -75,7 +78,7 @@ impl Group {
         let result = crate::runtime::spawn(fu).await.unwrap();
         match Result::from(result) {
             Ok(ma) => Ok(Image(ma)),
-            Err(e) => Err(AtriError::RQError(e)),
+            Err(e) => Err(AtriError::ClientError(e)),
         }
     }
 
@@ -84,7 +87,7 @@ impl Group {
         let fu = { (get_plugin_manager_vtb().group_change_name)(self.0.pointer, rs) };
         let result: FFIResult<()> = crate::runtime::spawn(fu).await.unwrap();
 
-        Result::from(result).map_err(|s| AtriError::RQError(s))
+        Result::from(result).map_err(|s| AtriError::ClientError(s))
     }
 
     pub async fn quit(&self) -> bool {

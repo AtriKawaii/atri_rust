@@ -26,16 +26,19 @@ impl Friend {
         Bot(ma)
     }
 
-    pub async fn send_message(&self, chain: MessageChain) -> Result<MessageReceipt, AtriError> {
+    pub async fn send_message<M: Into<MessageChain>>(
+        &self,
+        chain: M,
+    ) -> Result<MessageReceipt, AtriError> {
         let fu = {
-            let ffi = chain.into_ffi();
+            let ffi = chain.into().into_ffi();
             (get_plugin_manager_vtb().friend_send_message)(self.0.pointer, ffi)
         };
 
         let result = Result::from(crate::runtime::spawn(fu).await.unwrap());
         match result {
             Ok(ma) => Ok(MessageReceipt(ma)),
-            Err(s) => Err(AtriError::RQError(s)),
+            Err(s) => Err(AtriError::ClientError(s)),
         }
     }
 
@@ -46,7 +49,7 @@ impl Friend {
 
         match Result::from(result) {
             Ok(ma) => Ok(Image(ma)),
-            Err(s) => Err(AtriError::RQError(s)),
+            Err(s) => Err(AtriError::ClientError(s)),
         }
     }
 }
