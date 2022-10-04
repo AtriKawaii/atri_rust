@@ -29,6 +29,7 @@ impl Plugin for MyPlugin {
     fn new() -> Self {
         Self { listener: None }
     }
+
     fn enable(&mut self) {
         info!("Enable my plugin");
 
