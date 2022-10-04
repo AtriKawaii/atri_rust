@@ -33,7 +33,7 @@ pub fn plugin(_attr: TokenStream, input: TokenStream) -> TokenStream {
         let mut token = None::<&TokenTree>;
         while let Some(t) = iter.next() {
             let str = t.to_string();
-            if str == "struct" || str == "enum" {
+            if let "struct" | "enum" | "union" = &*str {
                 token = iter.next();
                 break;
             }
