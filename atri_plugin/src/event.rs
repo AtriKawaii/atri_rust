@@ -10,7 +10,7 @@ use std::ops::Deref;
 
 #[derive(Clone)]
 pub enum Event {
-    BotOnlineEvent(BotOnlineEvent),
+    BotLoginEvent(BotLoginEvent),
     GroupMessageEvent(GroupMessageEvent),
     FriendMessageEvent(FriendMessageEvent),
     Unknown(EventInner),
@@ -25,7 +25,7 @@ impl Event {
         };
 
         match t {
-            0 => Self::BotOnlineEvent(BotOnlineEvent(inner)),
+            0 => Self::BotLoginEvent(BotLoginEvent(inner)),
             1 => Self::GroupMessageEvent(GroupMessageEvent(inner)),
             2 => Self::FriendMessageEvent(FriendMessageEvent(inner)),
             _ => Self::Unknown(inner),
@@ -60,7 +60,7 @@ unsafe impl Send for EventInner {}
 unsafe impl Sync for EventInner {}
 
 #[derive(Clone)]
-pub struct BotOnlineEvent(EventInner);
+pub struct BotLoginEvent(EventInner);
 
 #[derive(Clone)]
 pub struct GroupMessageEvent(EventInner);
@@ -145,7 +145,7 @@ macro_rules! event_inner_impl {
 }
 
 event_inner_impl! {
-    BotOnlineEvent
+    BotLoginEvent
     GroupMessageEvent
     FriendMessageEvent
 }
