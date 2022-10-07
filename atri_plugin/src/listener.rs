@@ -4,8 +4,6 @@ use atri_ffi::closure::FFIFn;
 use atri_ffi::future::FFIFuture;
 use atri_ffi::Managed;
 use std::future::Future;
-use std::pin::Pin;
-use std::task::Poll;
 
 pub struct Listener;
 
@@ -18,11 +16,9 @@ impl Listener {
         Fu: Send + 'static,
     {
         let f = FFIFn::from_static(move |ffi| {
-            let mut fu = handler(Event::from_ffi(ffi));
+            let fu = handler(Event::from_ffi(ffi));
 
-            FFIFuture::from_static(async move {
-                crate::runtime::spawn(fu).await.unwrap_or(false)
-            })
+            FFIFuture::from_static(async move { crate::runtime::spawn(fu).await.unwrap_or(false) })
         });
         let ma = (get_plugin_manager_vtb().new_listener)(f);
         ListenerGuard(ma)
