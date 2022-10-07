@@ -4,11 +4,36 @@ use std::mem::ManuallyDrop;
 
 pub mod meta;
 
-pub const TEXT: u8 = 0;
-pub const IMAGE: u8 = 1;
-pub const AT: u8 = 2;
-pub const AT_ALL: u8 = 3;
-pub const UNKNOWN: u8 = 255;
+#[repr(u8)]
+#[derive(Copy, Clone)]
+pub enum MessageValueFlag {
+    Text = 0,
+    Image = 1,
+    At = 2,
+    AtAll = 3,
+    Unknown = 255,
+}
+
+impl MessageValueFlag {
+    pub fn value(self) -> u8 {
+        self as u8
+    }
+}
+
+impl TryFrom<u8> for MessageValueFlag {
+    type Error = u8;
+
+    fn try_from(flag: u8) -> Result<Self, Self::Error> {
+        Ok(match flag {
+            0 => Self::Text,
+            1 => Self::Image,
+            2 => Self::At,
+            3 => Self::AtAll,
+            255 => Self::Unknown,
+            _ => return Err(flag),
+        })
+    }
+}
 
 #[repr(C)]
 pub struct FFIMessageChain {
