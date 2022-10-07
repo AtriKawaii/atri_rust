@@ -19,13 +19,10 @@ impl Listener {
     {
         let f = FFIFn::from_static(move |ffi| {
             let mut fu = handler(Event::from_ffi(ffi));
-            let catching = std::future::poll_fn(move |ctx| {
-                let pin = unsafe { Pin::new_unchecked(&mut fu) };
-                std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| pin.poll(ctx)))
-                    .unwrap_or(Poll::Ready(false))
-            });
 
-            FFIFuture::from_static(catching)
+            FFIFuture::from_static(async move {
+                crate::runtime::spawn(fu).await.unwrap_or(false)
+            })
         });
         let ma = (get_plugin_manager_vtb().new_listener)(f);
         ListenerGuard(ma)
