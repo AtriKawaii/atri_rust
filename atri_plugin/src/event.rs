@@ -10,9 +10,9 @@ use std::ops::Deref;
 
 #[derive(Clone)]
 pub enum Event {
-    BotLoginEvent(BotLoginEvent),
-    GroupMessageEvent(GroupMessageEvent),
-    FriendMessageEvent(FriendMessageEvent),
+    BotLogin(BotLoginEvent),
+    GroupMessage(GroupMessageEvent),
+    FriendMessage(FriendMessageEvent),
     Unknown(EventInner),
 }
 
@@ -25,9 +25,9 @@ impl Event {
         };
 
         match t {
-            0 => Self::BotLoginEvent(BotLoginEvent(inner)),
-            1 => Self::GroupMessageEvent(GroupMessageEvent(inner)),
-            2 => Self::FriendMessageEvent(FriendMessageEvent(inner)),
+            0 => Self::BotLogin(BotLoginEvent(inner)),
+            1 => Self::GroupMessage(GroupMessageEvent(inner)),
+            2 => Self::FriendMessage(FriendMessageEvent(inner)),
             _ => Self::Unknown(inner),
         }
     }
@@ -47,7 +47,7 @@ pub struct EventInner {
 
 impl EventInner {
     pub fn intercept(&self) {
-        (get_plugin_manager_vtb().event_intercept)(self.intercepted)
+        (get_plugin_manager_vtb().event_intercept)(self.intercepted);
     }
 
     pub fn is_intercepted(&self) -> bool {
@@ -89,7 +89,7 @@ impl GroupMessageEvent {
 
 impl FromEvent for GroupMessageEvent {
     fn from_event(e: Event) -> Option<Self> {
-        if let Event::GroupMessageEvent(e) = e {
+        if let Event::GroupMessage(e) = e {
             Some(e)
         } else {
             None
@@ -118,7 +118,7 @@ impl FriendMessageEvent {
 
 impl FromEvent for FriendMessageEvent {
     fn from_event(e: Event) -> Option<Self> {
-        if let Event::FriendMessageEvent(e) = e {
+        if let Event::FriendMessage(e) = e {
             Some(e)
         } else {
             None
