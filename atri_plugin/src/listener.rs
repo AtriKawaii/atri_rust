@@ -33,12 +33,11 @@ impl Listener {
     {
         Self::new(move |e: Event| {
             let fu = handler(e);
-            let b: Box<dyn Future<Output = bool> + Send + 'static> = Box::new(async move {
+
+            async move {
                 fu.await;
                 true
-            });
-
-            Box::into_pin(b)
+            }
         })
     }
 
@@ -51,15 +50,15 @@ impl Listener {
         E: FromEvent,
     {
         Self::new(move |e: Event| {
-            let b: Box<dyn Future<Output = bool> + Send + 'static> =
-                if let Some(e) = E::from_event(e) {
-                    let fu = handler(e);
-                    Box::new(fu)
-                } else {
-                    Box::new(bool_true())
-                };
+            let fu = E::from_event(e).and_then(|e| Some(handler(e)));
 
-            Box::into_pin(b)
+            async move {
+                if let Some(fu) = fu {
+                    fu.await
+                } else {
+                    true
+                }
+            }
         })
     }
 
@@ -72,25 +71,15 @@ impl Listener {
         E: FromEvent,
     {
         Self::new_always(move |e: Event| {
-            let b: Box<dyn Future<Output = ()> + Send + 'static> = if let Some(e) = E::from_event(e)
-            {
-                let fu = handler(e);
-                Box::new(async move {
-                    fu.await;
-                })
-            } else {
-                Box::new(nop())
-            };
+            let fu = E::from_event(e).and_then(|e| Some(handler(e)));
 
-            Box::into_pin(b)
+            async move {
+                if let Some(fu) = fu {
+                    fu.await;
+                }
+            }
         })
     }
 }
 
 pub struct ListenerGuard(Managed);
-
-async fn bool_true() -> bool {
-    true
-}
-
-async fn nop() {}
