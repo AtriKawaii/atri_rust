@@ -121,11 +121,10 @@ impl Listener {
             FFIFn::from(move |ffi| {
                 let event = Event::from_ffi(ffi);
 
-                if let Some(e) = E::from_event(event) {
-                    filter(&e)
-                } else {
-                    false
-                }
+                E::from_event(event)
+                    .as_ref()
+                    .map(filter)
+                    .unwrap_or(false)
             }),
             priority as u8,
         ))
