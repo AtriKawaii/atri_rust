@@ -278,7 +278,7 @@ unsafe impl<T: Sync> Sync for RustSlice<T> {}
 #[repr(C)]
 pub struct FFIOption<T> {
     is_some: bool,
-    value: MaybeUninit<T>
+    value: MaybeUninit<T>,
 }
 
 unsafe impl<T: Send> Send for FFIOption<T> {}
@@ -289,12 +289,12 @@ impl<T> From<Option<T>> for FFIOption<T> {
         match val {
             Some(t) => Self {
                 is_some: true,
-                value: MaybeUninit::new(t)
+                value: MaybeUninit::new(t),
             },
             None => Self {
                 is_some: false,
-                value: MaybeUninit::uninit()
-            }
+                value: MaybeUninit::uninit(),
+            },
         }
     }
 }
@@ -302,10 +302,10 @@ impl<T> From<Option<T>> for FFIOption<T> {
 impl<T> From<FFIOption<T>> for Option<T> {
     fn from(ffi: FFIOption<T>) -> Self {
         if ffi.is_some {
-            unsafe {
-                Some(ffi.value.assume_init())
-            }
-        } else { None }
+            unsafe { Some(ffi.value.assume_init()) }
+        } else {
+            None
+        }
     }
 }
 
