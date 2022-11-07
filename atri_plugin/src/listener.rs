@@ -31,7 +31,12 @@ impl Listener {
         let f = FFIFn::from_static(move |ffi| {
             let fu = handler(Event::from_ffi(ffi));
 
-            FFIFuture::from_static(async move { crate::runtime::spawn(fu).await.unwrap_or(false) })
+            FFIFuture::from_static(async move {
+                crate::runtime::spawn(fu).await.unwrap_or_else(|e| {
+                    println!("监听器遇到预料之外的错误, 停止监听: {}", e);
+                    false
+                })
+            })
         });
         let ma = (get_plugin_manager_vtb().new_listener)(f);
         ListenerGuard(ma)

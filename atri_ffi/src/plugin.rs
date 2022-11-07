@@ -10,6 +10,6 @@ pub struct PluginInstance {
 #[repr(C)]
 pub struct PluginVTable {
     pub new: extern "C" fn() -> *mut (),
-    pub enable: extern "C" fn(*mut ()),
-    pub disable: extern "C" fn(*mut ()),
+    pub enable: extern "C" fn(*mut ()) -> bool,
+    pub disable: extern "C" fn(*mut ()) -> bool,
 }

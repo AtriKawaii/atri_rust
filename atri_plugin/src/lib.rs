@@ -1,5 +1,6 @@
 use atri_ffi::plugin::PluginVTable;
 use atri_ffi::Managed;
+use std::ptr::null_mut;
 
 pub use atri_macros::plugin;
 
@@ -55,20 +56,29 @@ pub struct PluginInfo {
 #[doc(hidden)]
 pub fn __get_instance<P: Plugin>(plugin: P) -> PluginInstance {
     extern "C" fn _new<P: Plugin>() -> *mut () {
-        let b = Box::new(P::new());
-        Box::into_raw(b) as *mut ()
+        std::panic::catch_unwind(|| {
+            let b = Box::new(P::new());
+            Box::into_raw(b) as *mut ()
+        })
+        .unwrap_or(null_mut())
     }
 
-    extern "C" fn _enable<P: Plugin>(ptr: *mut ()) {
+    extern "C" fn _enable<P: Plugin>(ptr: *mut ()) -> bool {
         // Safety: Plugin is pinned by box
         let p = unsafe { &mut *(ptr as *mut P) };
-        p.enable();
+        std::panic::catch_unwind(|| {
+            p.enable();
+        })
+        .is_ok()
     }
 
-    extern "C" fn _disable<P: Plugin>(ptr: *mut ()) {
+    extern "C" fn _disable<P: Plugin>(ptr: *mut ()) -> bool {
         // Safety: Plugin is pinned by box
         let p = unsafe { &mut *(ptr as *mut P) };
-        p.disable();
+        std::panic::catch_unwind(|| {
+            p.disable();
+        })
+        .is_ok()
     }
 
     let should_drop = P::should_drop();
