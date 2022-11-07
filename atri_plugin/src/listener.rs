@@ -6,6 +6,7 @@ use atri_ffi::future::FFIFuture;
 use atri_ffi::Managed;
 use std::future::Future;
 use std::time::Duration;
+use crate::error;
 
 pub struct Listener;
 
@@ -33,7 +34,7 @@ impl Listener {
 
             FFIFuture::from_static(async move {
                 crate::runtime::spawn(fu).await.unwrap_or_else(|e| {
-                    eprintln!("监听器发生预料之外的错误, 停止监听: {}", e);
+                    error!("监听器发生预料之外的错误, 停止监听: {}", e);
                     false
                 })
             })
@@ -42,6 +43,7 @@ impl Listener {
         ListenerGuard(ma)
     }
 
+    #[inline]
     fn new_always<F, Fu>(handler: F) -> ListenerGuard
     where
         F: Fn(Event) -> Fu,
@@ -59,6 +61,7 @@ impl Listener {
         })
     }
 
+    #[inline]
     pub fn listening_on<E, F, Fu>(handler: F) -> ListenerGuard
     where
         F: Fn(E) -> Fu,
@@ -80,6 +83,7 @@ impl Listener {
         })
     }
 
+    #[inline]
     pub fn listening_on_always<E, F, Fu>(handler: F) -> ListenerGuard
     where
         F: Fn(E) -> Fu,
@@ -99,6 +103,7 @@ impl Listener {
         })
     }
 
+    #[inline]
     pub async fn next_event<E, F>(timeout: Duration, filter: F) -> Option<E>
     where
         E: FromEvent,
