@@ -99,7 +99,6 @@ impl Listener {
         E: FromEvent,
         E: Send + 'static,
         F: Fn(&E) -> bool,
-        F: Send + 'static,
     {
         Self::next_event_with_priority(timeout, filter, Priority::Middle).await
     }
@@ -113,12 +112,11 @@ impl Listener {
         E: FromEvent,
         E: Send + 'static,
         F: Fn(&E) -> bool,
-        F: Send + 'static,
     {
         let ffi = crate::runtime::spawn((get_plugin_manager_vtb()
             .listener_next_event_with_priority)(
             timeout.as_millis() as u64,
-            FFIFn::from(move |ffi| {
+            FFIFn::from(|ffi| {
                 let event = Event::from_ffi(ffi);
 
                 E::from_event(event).as_ref().map(&filter).unwrap_or(false)
