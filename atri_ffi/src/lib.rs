@@ -281,6 +281,9 @@ pub struct FFIOption<T> {
     value: MaybeUninit<T>
 }
 
+unsafe impl<T: Send> Send for FFIOption<T> {}
+unsafe impl<T: Sync> Sync for FFIOption<T> {}
+
 impl<T> From<Option<T>> for FFIOption<T> {
     fn from(val: Option<T>) -> Self {
         match val {

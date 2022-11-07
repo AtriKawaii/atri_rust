@@ -14,6 +14,9 @@ pub struct FFIEvent {
     pub base: ManagedCloneable,
 }
 
+unsafe impl Send for FFIEvent {}
+unsafe impl Sync for FFIEvent {}
+
 impl FFIEvent {
     pub fn from(t: u8, intercepted: *const (), base: ManagedCloneable) -> Self {
         Self {

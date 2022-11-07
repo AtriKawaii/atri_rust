@@ -1,6 +1,6 @@
 [package]
 name = "atri_plugin"
-version = "0.2.14"
+version = "0.2.15"
 edition = "2021"
 authors = ["LaoLittle"]
 description = "AtriPlugin"
@@ -18,7 +18,7 @@ repository = "https://github.com/AtriKawaii/atri_rust"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies.atri_ffi]
-version = "0.2.5"
+version = "0.2.7"
 path = "../atri_ffi"
 
 [dependencies.atri_macros]

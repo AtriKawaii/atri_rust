@@ -4,7 +4,7 @@ use atri_ffi::error::FFIResult;
 use atri_ffi::ffi::{AtriManager, FFIEvent};
 use atri_ffi::future::FFIFuture;
 use atri_ffi::message::FFIMessageChain;
-use atri_ffi::{Managed, ManagedCloneable, RustStr, RustString, RustVec};
+use atri_ffi::{FFIOption, Managed, ManagedCloneable, RustStr, RustString, RustVec};
 use std::mem::MaybeUninit;
 
 pub struct AtriVTable {
@@ -13,6 +13,11 @@ pub struct AtriVTable {
     pub plugin_manager_block_on: extern "C" fn(manager: *const (), FFIFuture<Managed>) -> Managed,
 
     pub new_listener: extern "C" fn(FFIFn<FFIEvent, FFIFuture<bool>>) -> Managed,
+    pub listener_next_event_with_priority: extern "C" fn(
+        millis: u64,
+        filter: FFIFn<FFIEvent, bool>,
+        priority: u8,
+    ) -> FFIFuture<FFIOption<FFIEvent>>,
 
     pub event_intercept: extern "C" fn(intercepted: *const ()),
     pub event_is_intercepted: extern "C" fn(intercepted: *const ()) -> bool,
@@ -94,6 +99,7 @@ unsafe extern "C" fn atri_manager_init(manager: AtriManager) {
         plugin_manager_block_on => 1,
 
         new_listener => 100,
+        listener_next_event_with_priority => 101,
 
         event_intercept => 200,
         event_is_intercepted => 201,

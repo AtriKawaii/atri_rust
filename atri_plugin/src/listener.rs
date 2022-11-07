@@ -1,11 +1,24 @@
 use crate::event::{Event, FromEvent};
 use crate::loader::get_plugin_manager_vtb;
 use atri_ffi::closure::FFIFn;
+use atri_ffi::ffi::FFIEvent;
 use atri_ffi::future::FFIFuture;
 use atri_ffi::Managed;
 use std::future::Future;
+use std::time::Duration;
 
 pub struct Listener;
+
+#[repr(u8)]
+#[derive(Copy, Clone, Default)]
+pub enum Priority {
+    Top = 0,
+    High = 1,
+    #[default]
+    Middle = 2,
+    Low = 3,
+    Base = 4,
+}
 
 impl Listener {
     pub fn new<F, Fu>(handler: F) -> ListenerGuard
@@ -79,6 +92,51 @@ impl Listener {
                 }
             }
         })
+    }
+
+    pub async fn next_event<E, F>(timeout: Duration, filter: F) -> Option<E>
+    where
+        E: FromEvent,
+        E: Send + 'static,
+        F: Fn(&E) -> bool,
+        F: Send + 'static,
+    {
+        Self::next_event_with_priority(timeout, filter, Priority::Middle).await
+    }
+
+    pub async fn next_event_with_priority<E, F>(
+        timeout: Duration,
+        filter: F,
+        priority: Priority,
+    ) -> Option<E>
+    where
+        E: FromEvent,
+        E: Send + 'static,
+        F: Fn(&E) -> bool,
+        F: Send + 'static,
+    {
+        crate::runtime::spawn(async move {
+            let ffi = crate::runtime::spawn((get_plugin_manager_vtb().listener_next_event_with_priority)(
+                timeout.as_millis() as u64,
+                FFIFn::from(move |ffi| {
+                    let event = Event::from_ffi(ffi);
+
+                    if let Some(e) = E::from_event(event) {
+                        filter(&e)
+                    } else {
+                        true
+                    }
+                }),
+                priority as u8,
+            )).await.unwrap();
+
+            if let Some(ffi) = Option::<FFIEvent>::from(ffi) {
+                let event = Event::from_ffi(ffi);
+                E::from_event(event)
+            } else {
+                None
+            }
+        }).await.unwrap()
     }
 }
 
