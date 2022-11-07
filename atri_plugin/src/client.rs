@@ -5,9 +5,9 @@ use atri_ffi::ManagedCloneable;
 use std::fmt::{Display, Formatter};
 
 #[derive(Clone)]
-pub struct Bot(pub(crate) ManagedCloneable);
+pub struct Client(pub(crate) ManagedCloneable);
 
-impl Bot {
+impl Client {
     pub fn id(&self) -> i64 {
         (get_plugin_manager_vtb().bot_get_id)(self.0.pointer)
     }
@@ -18,10 +18,10 @@ impl Bot {
         rs.into()
     }
 
-    pub fn list() -> Vec<Bot> {
+    pub fn list() -> Vec<Client> {
         let raw = (get_plugin_manager_vtb().bot_get_list)();
 
-        raw.into_vec().into_iter().map(Bot).collect()
+        raw.into_vec().into_iter().map(Client).collect()
     }
 
     pub fn find(id: i64) -> Option<Self> {
@@ -65,7 +65,7 @@ impl Bot {
     }
 }
 
-impl Display for Bot {
+impl Display for Client {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "Bot({})", self.id())
     }

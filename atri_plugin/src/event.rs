@@ -1,4 +1,4 @@
-use crate::bot::Bot;
+use crate::client::Client;
 use crate::contact::friend::Friend;
 use crate::contact::group::Group;
 use crate::contact::member::Member;
@@ -73,7 +73,7 @@ impl GroupMessageEvent {
         Group(ma)
     }
 
-    pub fn bot(&self) -> Bot {
+    pub fn bot(&self) -> Client {
         self.group().bot()
     }
 
@@ -125,7 +125,7 @@ impl FriendMessageEvent {
         Friend(ma)
     }
 
-    pub fn bot(&self) -> Bot {
+    pub fn bot(&self) -> Client {
         self.friend().bot()
     }
 

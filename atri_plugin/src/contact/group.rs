@@ -1,4 +1,4 @@
-use crate::bot::Bot;
+use crate::client::Client;
 use crate::contact::member::NamedMember;
 use crate::error::AtriError;
 use crate::loader::get_plugin_manager_vtb;
@@ -24,9 +24,9 @@ impl Group {
         (get_plugin_manager_vtb().group_get_id)(self.0.pointer)
     }
 
-    pub fn bot(&self) -> Bot {
+    pub fn bot(&self) -> Client {
         let ma = (get_plugin_manager_vtb().group_get_bot)(self.0.pointer);
-        Bot(ma)
+        Client(ma)
     }
 
     pub fn name(&self) -> &str {

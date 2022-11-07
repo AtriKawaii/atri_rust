@@ -1,4 +1,4 @@
-use crate::bot::Bot;
+use crate::client::Client;
 use atri_ffi::contact::FFIMember;
 use atri_ffi::{ManagedCloneable, RustStr};
 use std::fmt::{Display, Formatter};
@@ -62,7 +62,7 @@ impl NamedMember {
         Group(ma)
     }
 
-    pub fn bot(&self) -> Bot {
+    pub fn bot(&self) -> Client {
         self.group().bot()
     }
 

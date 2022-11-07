@@ -3,7 +3,7 @@ use atri_ffi::Managed;
 
 pub use atri_macros::plugin;
 
-pub mod bot;
+pub mod client;
 pub mod contact;
 pub mod error;
 pub mod event;

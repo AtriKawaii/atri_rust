@@ -1,4 +1,4 @@
-use crate::bot::Bot;
+use crate::client::Client;
 use crate::error::AtriError;
 use crate::loader::get_plugin_manager_vtb;
 use crate::message::image::Image;
@@ -21,9 +21,9 @@ impl Friend {
         rs.as_str()
     }
 
-    pub fn bot(&self) -> Bot {
+    pub fn bot(&self) -> Client {
         let ma = (get_plugin_manager_vtb().friend_get_bot)(self.0.pointer);
-        Bot(ma)
+        Client(ma)
     }
 
     pub async fn send_message<M: Into<MessageChain>>(
