@@ -33,7 +33,7 @@ impl Listener {
 
             FFIFuture::from_static(async move {
                 crate::runtime::spawn(fu).await.unwrap_or_else(|e| {
-                    println!("监听器遇到预料之外的错误, 停止监听: {}", e);
+                    eprintln!("监听器发生预料之外的错误, 停止监听: {}", e);
                     false
                 })
             })
