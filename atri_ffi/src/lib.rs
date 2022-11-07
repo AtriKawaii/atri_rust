@@ -1,4 +1,4 @@
-use std::mem::ManuallyDrop;
+use std::mem::{ManuallyDrop, MaybeUninit};
 use std::ops::Deref;
 use std::ptr::null_mut;
 use std::{mem, slice};
@@ -247,6 +247,7 @@ impl<T> From<Vec<T>> for RustVec<T> {
     }
 }
 
+#[repr(C)]
 pub struct RustSlice<T> {
     ptr: *const T,
     len: usize,
@@ -273,6 +274,37 @@ impl<T> From<&[T]> for RustSlice<T> {
 
 unsafe impl<T: Send> Send for RustSlice<T> {}
 unsafe impl<T: Sync> Sync for RustSlice<T> {}
+
+#[repr(C)]
+pub struct FFIOption<T> {
+    is_some: bool,
+    value: MaybeUninit<T>
+}
+
+impl<T> From<Option<T>> for FFIOption<T> {
+    fn from(val: Option<T>) -> Self {
+        match val {
+            Some(t) => Self {
+                is_some: true,
+                value: MaybeUninit::new(t)
+            },
+            None => Self {
+                is_some: false,
+                value: MaybeUninit::uninit()
+            }
+        }
+    }
+}
+
+impl<T> From<FFIOption<T>> for Option<T> {
+    fn from(ffi: FFIOption<T>) -> Self {
+        if ffi.is_some {
+            unsafe {
+                Some(ffi.value.assume_init())
+            }
+        } else { None }
+    }
+}
 
 #[cfg(test)]
 mod tests {
