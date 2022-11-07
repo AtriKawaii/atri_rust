@@ -24,8 +24,8 @@ impl Group {
         (get_plugin_manager_vtb().group_get_id)(self.0.pointer)
     }
 
-    pub fn bot(&self) -> Client {
-        let ma = (get_plugin_manager_vtb().group_get_bot)(self.0.pointer);
+    pub fn client(&self) -> Client {
+        let ma = (get_plugin_manager_vtb().group_get_client)(self.0.pointer);
         Client(ma)
     }
 

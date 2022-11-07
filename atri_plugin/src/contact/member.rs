@@ -62,8 +62,8 @@ impl NamedMember {
         Group(ma)
     }
 
-    pub fn bot(&self) -> Client {
-        self.group().bot()
+    pub fn client(&self) -> Client {
+        self.group().client()
     }
 
     pub async fn change_card_name(&self, card_name: &str) -> Result<(), AtriError> {

@@ -19,17 +19,17 @@ pub struct AtriVTable {
         priority: u8,
     ) -> FFIFuture<FFIOption<FFIEvent>>,
 
-    pub event_intercept: extern "C" fn(intercepted: *const ()),
-    pub event_is_intercepted: extern "C" fn(intercepted: *const ()) -> bool,
+    pub event_intercept: extern "C" fn(*const ()),
+    pub event_is_intercepted: extern "C" fn(*const ()) -> bool,
 
-    pub bot_get_id: extern "C" fn(bot: *const ()) -> i64,
-    pub bot_get_nickname: extern "C" fn(bot: *const ()) -> RustString,
-    pub bot_get_list: extern "C" fn() -> RustVec<ManagedCloneable>,
-    pub find_bot: extern "C" fn(id: i64) -> ManagedCloneable,
-    pub bot_find_group: extern "C" fn(bot: *const (), id: i64) -> ManagedCloneable,
-    pub bot_find_friend: extern "C" fn(bot: *const (), id: i64) -> ManagedCloneable,
-    pub bot_get_groups: extern "C" fn(bot: *const ()) -> RustVec<ManagedCloneable>,
-    pub bot_get_friends: extern "C" fn(bot: *const ()) -> RustVec<ManagedCloneable>,
+    pub client_get_id: extern "C" fn(*const ()) -> i64,
+    pub client_get_nickname: extern "C" fn(*const ()) -> RustString,
+    pub client_get_list: extern "C" fn() -> RustVec<ManagedCloneable>,
+    pub find_client: extern "C" fn(i64) -> ManagedCloneable,
+    pub client_find_group: extern "C" fn(*const (), i64) -> ManagedCloneable,
+    pub client_find_friend: extern "C" fn(*const (), i64) -> ManagedCloneable,
+    pub client_get_groups: extern "C" fn(*const ()) -> RustVec<ManagedCloneable>,
+    pub client_get_friends: extern "C" fn(*const ()) -> RustVec<ManagedCloneable>,
 
     pub group_message_event_get_group: extern "C" fn(event: *const ()) -> ManagedCloneable,
     pub group_message_event_get_message: extern "C" fn(event: *const ()) -> FFIMessageChain,
@@ -37,7 +37,7 @@ pub struct AtriVTable {
 
     pub group_get_id: extern "C" fn(group: *const ()) -> i64,
     pub group_get_name: extern "C" fn(group: *const ()) -> RustStr,
-    pub group_get_bot: extern "C" fn(group: *const ()) -> ManagedCloneable,
+    pub group_get_client: extern "C" fn(group: *const ()) -> ManagedCloneable,
     pub group_get_members: extern "C" fn(group: *const ()) -> FFIFuture<RustVec<ManagedCloneable>>,
     pub group_find_member: extern "C" fn(group: *const (), id: i64) -> ManagedCloneable,
     pub group_get_named_member:
@@ -54,7 +54,7 @@ pub struct AtriVTable {
     pub friend_message_event_get_message: extern "C" fn(event: *const ()) -> FFIMessageChain,
     pub friend_get_id: extern "C" fn(friend: *const ()) -> i64,
     pub friend_get_nickname: extern "C" fn(friend: *const ()) -> RustStr,
-    pub friend_get_bot: extern "C" fn(friend: *const ()) -> ManagedCloneable,
+    pub friend_get_client: extern "C" fn(friend: *const ()) -> ManagedCloneable,
     pub friend_send_message:
         extern "C" fn(friend: *const (), chain: FFIMessageChain) -> FFIFuture<FFIResult<Managed>>,
     pub friend_upload_image:
@@ -104,18 +104,18 @@ unsafe extern "C" fn atri_manager_init(manager: AtriManager) {
         event_intercept => 200,
         event_is_intercepted => 201,
 
-        bot_get_id => 300,
-        bot_get_nickname => 301,
-        bot_get_list => 302,
-        find_bot => 303,
-        bot_find_group => 304,
-        bot_find_friend => 305,
-        bot_get_groups => 306,
-        bot_get_friends => 307,
+        client_get_id => 300,
+        client_get_nickname => 301,
+        client_get_list => 302,
+        find_client => 303,
+        client_find_group => 304,
+        client_find_friend => 305,
+        client_get_groups => 306,
+        client_get_friends => 307,
 
         group_get_id => 400,
         group_get_name => 401,
-        group_get_bot => 402,
+        group_get_client => 402,
         group_get_members => 403,
         group_find_member => 404,
         group_get_named_member => 405,
@@ -126,7 +126,7 @@ unsafe extern "C" fn atri_manager_init(manager: AtriManager) {
 
         friend_get_id => 500,
         friend_get_nickname => 501,
-        friend_get_bot => 502,
+        friend_get_client => 502,
         friend_send_message => 503,
         friend_upload_image => 504,
 

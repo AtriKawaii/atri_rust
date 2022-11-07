@@ -21,8 +21,8 @@ impl Friend {
         rs.as_str()
     }
 
-    pub fn bot(&self) -> Client {
-        let ma = (get_plugin_manager_vtb().friend_get_bot)(self.0.pointer);
+    pub fn client(&self) -> Client {
+        let ma = (get_plugin_manager_vtb().friend_get_client)(self.0.pointer);
         Client(ma)
     }
 

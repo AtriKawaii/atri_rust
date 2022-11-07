@@ -12,7 +12,7 @@ use std::time::Duration;
 
 #[derive(Clone)]
 pub enum Event {
-    BotLogin(BotLoginEvent),
+    ClientLogin(ClientLoginEvent),
     GroupMessage(GroupMessageEvent),
     FriendMessage(FriendMessageEvent),
     Unknown(EventInner),
@@ -27,7 +27,7 @@ impl Event {
         };
 
         match t {
-            0 => Self::BotLogin(BotLoginEvent(inner)),
+            0 => Self::ClientLogin(ClientLoginEvent(inner)),
             1 => Self::GroupMessage(GroupMessageEvent(inner)),
             2 => Self::FriendMessage(FriendMessageEvent(inner)),
             _ => Self::Unknown(inner),
@@ -62,7 +62,7 @@ unsafe impl Send for EventInner {}
 unsafe impl Sync for EventInner {}
 
 #[derive(Clone)]
-pub struct BotLoginEvent(EventInner);
+pub struct ClientLoginEvent(EventInner);
 
 #[derive(Clone)]
 pub struct GroupMessageEvent(EventInner);
@@ -73,8 +73,8 @@ impl GroupMessageEvent {
         Group(ma)
     }
 
-    pub fn bot(&self) -> Client {
-        self.group().bot()
+    pub fn client(&self) -> Client {
+        self.group().client()
     }
 
     pub fn sender(&self) -> Member {
@@ -125,8 +125,8 @@ impl FriendMessageEvent {
         Friend(ma)
     }
 
-    pub fn bot(&self) -> Client {
-        self.friend().bot()
+    pub fn client(&self) -> Client {
+        self.friend().client()
     }
 
     pub fn message(&self) -> MessageChain {
@@ -180,7 +180,7 @@ macro_rules! event_inner_impl {
 }
 
 event_inner_impl! {
-    BotLoginEvent
+    ClientLoginEvent
     GroupMessageEvent
     FriendMessageEvent
 }
