@@ -123,7 +123,7 @@ impl Listener {
 
                 E::from_event(event)
                     .as_ref()
-                    .map(filter)
+                    .map(&filter)
                     .unwrap_or(false)
             }),
             priority as u8,
@@ -131,12 +131,10 @@ impl Listener {
         .await
         .unwrap();
 
-        if let Some(ffi) = Option::<FFIEvent>::from(ffi) {
+        Option::<FFIEvent>::from(ffi).and_then(|ffi| {
             let event = Event::from_ffi(ffi);
             E::from_event(event)
-        } else {
-            None
-        }
+        })
     }
 }
 
