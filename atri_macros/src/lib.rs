@@ -2,7 +2,6 @@ use proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenSt
 
 /// 标记一个结构体或枚举类型, 将其作为本插件的插件实例
 ///
-/// Marks a struct or an enum as a plugin can be loaded by atri_bot plugin module
 ///
 /// ## Usage
 ///
@@ -20,8 +19,6 @@ use proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenSt
 /// ```
 /// 请注意有且仅有一个实现了 [`atri_plugin::Plugin`] 的结构体或枚举可以被标记为`插件`
 ///
-/// Note that only one struct or enum that impls [`atri_plugin::Plugin`] trait can be
-/// mark as a plugin
 
 #[proc_macro_attribute]
 pub fn plugin(_attr: TokenStream, input: TokenStream) -> TokenStream {
