@@ -124,7 +124,7 @@ impl Listener {
                 if let Some(e) = E::from_event(event) {
                     filter(&e)
                 } else {
-                    true
+                    false
                 }
             }),
             priority as u8,
