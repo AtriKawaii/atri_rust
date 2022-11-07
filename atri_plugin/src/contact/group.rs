@@ -13,6 +13,12 @@ use std::fmt::{Display, Formatter};
 #[derive(Clone)]
 pub struct Group(pub(crate) ManagedCloneable);
 
+impl PartialEq for Group {
+    fn eq(&self, other: &Self) -> bool {
+        self.id() == other.id()
+    }
+}
+
 impl Group {
     pub fn id(&self) -> i64 {
         (get_plugin_manager_vtb().group_get_id)(self.0.pointer)

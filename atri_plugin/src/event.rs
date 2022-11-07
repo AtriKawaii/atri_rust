@@ -2,11 +2,13 @@ use crate::bot::Bot;
 use crate::contact::friend::Friend;
 use crate::contact::group::Group;
 use crate::contact::member::Member;
+use crate::listener::Listener;
 use crate::loader::get_plugin_manager_vtb;
 use crate::message::MessageChain;
 use atri_ffi::ffi::{FFIEvent, ForFFI};
 use atri_ffi::ManagedCloneable;
 use std::ops::Deref;
+use std::time::Duration;
 
 #[derive(Clone)]
 pub enum Event {
@@ -84,6 +86,23 @@ impl GroupMessageEvent {
     pub fn message(&self) -> MessageChain {
         let ffi = (get_plugin_manager_vtb().group_message_event_get_message)(self.0.event.pointer);
         MessageChain::from_ffi(ffi)
+    }
+
+    pub async fn next<F>(&self, timeout: Duration, filter: F) -> Option<Self>
+    where
+        F: Fn(&Self) -> bool,
+        F: Send + 'static,
+    {
+        let group_id = self.group().id();
+        let sender_id = self.sender().id();
+        Listener::next_event(timeout, move |e: &Self| {
+            if e.group().id() != group_id || e.sender().id() != sender_id {
+                return false;
+            }
+
+            filter(e)
+        })
+        .await
     }
 }
 

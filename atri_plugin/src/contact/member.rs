@@ -15,6 +15,15 @@ pub enum Member {
 }
 
 impl Member {
+    pub fn id(&self) -> i64 {
+        match self {
+            Self::Named(named) => named.id(),
+            Self::Anonymous(ano) => 80000000,
+        }
+    }
+}
+
+impl Member {
     pub(crate) fn from_ffi(ffi: FFIMember) -> Self {
         unsafe {
             if ffi.is_named {

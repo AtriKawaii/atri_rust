@@ -21,7 +21,7 @@ pub enum Priority {
 }
 
 impl Listener {
-    pub fn new<F, Fu>(handler: F) -> ListenerGuard
+    fn new<F, Fu>(handler: F) -> ListenerGuard
     where
         F: Fn(Event) -> Fu,
         F: Send + 'static,
@@ -115,28 +115,29 @@ impl Listener {
         F: Fn(&E) -> bool,
         F: Send + 'static,
     {
-        crate::runtime::spawn(async move {
-            let ffi = crate::runtime::spawn((get_plugin_manager_vtb().listener_next_event_with_priority)(
-                timeout.as_millis() as u64,
-                FFIFn::from(move |ffi| {
-                    let event = Event::from_ffi(ffi);
-
-                    if let Some(e) = E::from_event(event) {
-                        filter(&e)
-                    } else {
-                        true
-                    }
-                }),
-                priority as u8,
-            )).await.unwrap();
-
-            if let Some(ffi) = Option::<FFIEvent>::from(ffi) {
+        let ffi = crate::runtime::spawn((get_plugin_manager_vtb()
+            .listener_next_event_with_priority)(
+            timeout.as_millis() as u64,
+            FFIFn::from(move |ffi| {
                 let event = Event::from_ffi(ffi);
-                E::from_event(event)
-            } else {
-                None
-            }
-        }).await.unwrap()
+
+                if let Some(e) = E::from_event(event) {
+                    filter(&e)
+                } else {
+                    true
+                }
+            }),
+            priority as u8,
+        ))
+        .await
+        .unwrap();
+
+        if let Some(ffi) = Option::<FFIEvent>::from(ffi) {
+            let event = Event::from_ffi(ffi);
+            E::from_event(event)
+        } else {
+            None
+        }
     }
 }
 
