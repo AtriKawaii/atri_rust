@@ -133,6 +133,22 @@ impl FriendMessageEvent {
         let ffi = (get_plugin_manager_vtb().friend_message_event_get_message)(self.event.pointer);
         MessageChain::from_ffi(ffi)
     }
+
+    pub async fn next<F>(&self, timeout: Duration, filter: F) -> Option<Self>
+    where
+        F: Fn(&Self) -> bool,
+        F: Send + 'static,
+    {
+        let friend_id = self.friend().id();
+        Listener::next_event(timeout, move |e: &Self| {
+            if e.friend().id() != friend_id {
+                return false;
+            }
+
+            filter(e)
+        })
+        .await
+    }
 }
 
 impl FromEvent for FriendMessageEvent {
