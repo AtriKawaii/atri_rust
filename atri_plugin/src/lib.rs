@@ -84,6 +84,6 @@ pub fn __get_instance<P: Plugin>(plugin: P, name: &str) -> PluginInstance {
         instance,
         should_drop,
         vtb,
-        name: RustStr::from(name)
+        name: RustStr::from(name),
     }
 }

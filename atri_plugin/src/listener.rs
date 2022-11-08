@@ -1,3 +1,4 @@
+use crate::error;
 use crate::event::{Event, FromEvent};
 use crate::loader::get_plugin_manager_vtb;
 use atri_ffi::closure::FFIFn;
@@ -6,7 +7,6 @@ use atri_ffi::future::FFIFuture;
 use atri_ffi::Managed;
 use std::future::Future;
 use std::time::Duration;
-use crate::error;
 
 pub struct Listener;
 
