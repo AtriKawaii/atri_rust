@@ -40,19 +40,8 @@ where
     }
 }
 
-#[derive(Default)]
-pub struct PluginInfo {
-    /// 插件名称
-    pub name: &'static str,
-    /// 插件作者
-    pub author: &'static str,
-    /// 是否应该在插件被禁用后销毁插件实例
-    ///
-    /// 若为`false`，则插件只会在卸载时销毁实例
-    pub should_drop: bool,
-}
-
 #[doc(hidden)]
+/// 从已实现Plugin的结构体获取一个标准的PluginInstance
 pub fn __get_instance<P: Plugin>(plugin: P, name: &str) -> PluginInstance {
     extern "C" fn _new<P: Plugin>() -> *mut () {
         let b = Box::new(P::new());
