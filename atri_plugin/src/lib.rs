@@ -1,5 +1,5 @@
 use atri_ffi::plugin::PluginVTable;
-use atri_ffi::Managed;
+use atri_ffi::{Managed, RustStr};
 
 pub use atri_macros::plugin;
 
@@ -53,7 +53,7 @@ pub struct PluginInfo {
 }
 
 #[doc(hidden)]
-pub fn __get_instance<P: Plugin>(plugin: P) -> PluginInstance {
+pub fn __get_instance<P: Plugin>(plugin: P, name: &str) -> PluginInstance {
     extern "C" fn _new<P: Plugin>() -> *mut () {
         let b = Box::new(P::new());
         Box::into_raw(b) as *mut ()
@@ -84,5 +84,6 @@ pub fn __get_instance<P: Plugin>(plugin: P) -> PluginInstance {
         instance,
         should_drop,
         vtb,
+        name: RustStr::from(name)
     }
 }

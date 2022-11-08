@@ -1,10 +1,11 @@
-use crate::Managed;
+use crate::{Managed, RustStr};
 
 #[repr(C)]
 pub struct PluginInstance {
     pub instance: Managed,
     pub should_drop: bool,
     pub vtb: PluginVTable,
+    pub name: RustStr,
 }
 
 #[repr(C)]
