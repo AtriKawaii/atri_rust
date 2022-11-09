@@ -73,7 +73,7 @@ pub struct AtriVTable {
 
     pub log: extern "C" fn(handle: usize, manager: *const (), level: u8, log: RustStr),
 
-    pub env_get_workspace: extern "C" fn(handle: usize, manager: *const ()) -> RustString
+    pub env_get_workspace: extern "C" fn(handle: usize, manager: *const ()) -> RustString,
 }
 
 static mut ATRI_MANAGER: MaybeUninit<AtriManager> = MaybeUninit::uninit();
