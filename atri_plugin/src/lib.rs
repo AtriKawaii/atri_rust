@@ -12,6 +12,7 @@ pub mod loader;
 pub mod log;
 pub mod message;
 pub mod runtime;
+pub mod env;
 
 pub use atri_ffi::plugin::PluginInstance;
 

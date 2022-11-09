@@ -146,6 +146,20 @@ pub struct RustString {
     pub capacity: usize,
 }
 
+impl RustString {
+    pub fn null() -> Self {
+        Self {
+            ptr: null_mut(),
+            len: 0,
+            capacity: 0,
+        }
+    }
+    
+    pub fn is_null(&self) -> bool {
+        self.ptr.is_null()
+    }
+}
+
 impl From<String> for RustString {
     fn from(s: String) -> Self {
         let mut ma = ManuallyDrop::new(s);

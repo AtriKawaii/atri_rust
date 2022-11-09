@@ -72,6 +72,8 @@ pub struct AtriVTable {
     pub image_get_url: extern "C" fn(img: *const ()) -> RustString,
 
     pub log: extern "C" fn(handle: usize, manager: *const (), level: u8, log: RustStr),
+
+    pub env_get_workspace: extern "C" fn(handle: usize, manager: *const ()) -> RustString
 }
 
 static mut ATRI_MANAGER: MaybeUninit<AtriManager> = MaybeUninit::uninit();
@@ -148,6 +150,8 @@ unsafe extern "C" fn atri_manager_init(manager: AtriManager) {
         image_get_url => 2002,
 
         log => 20000,
+
+        env_get_workspace => 30000,
     };
 
     ATRI_VTABLE.write(vtable);
