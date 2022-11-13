@@ -22,45 +22,6 @@ pub enum Priority {
 }
 
 impl Listener {
-    fn new<F, Fu>(handler: F) -> ListenerGuard
-    where
-        F: Fn(Event) -> Fu,
-        F: Send + 'static,
-        Fu: Future<Output = bool>,
-        Fu: Send + 'static,
-    {
-        let f = FFIFn::from_static(move |ffi| {
-            let fu = handler(Event::from_ffi(ffi));
-
-            FFIFuture::from_static(async move {
-                crate::runtime::spawn(fu).await.unwrap_or_else(|e| {
-                    error!("监听器发生预料之外的错误, 停止监听: {}", e);
-                    false
-                })
-            })
-        });
-        let ma = (get_plugin_manager_vtb().new_listener)(f);
-        ListenerGuard(ma)
-    }
-
-    #[inline]
-    fn new_always<F, Fu>(handler: F) -> ListenerGuard
-    where
-        F: Fn(Event) -> Fu,
-        F: Send + 'static,
-        Fu: Future<Output = ()>,
-        Fu: Send + 'static,
-    {
-        Self::new(move |e: Event| {
-            let fu = handler(e);
-
-            async move {
-                fu.await;
-                true
-            }
-        })
-    }
-
     #[inline]
     pub fn listening_on<E, F, Fu>(handler: F) -> ListenerGuard
     where
@@ -70,17 +31,7 @@ impl Listener {
         Fu: Send + 'static,
         E: FromEvent,
     {
-        Self::new(move |e: Event| {
-            let fu = E::from_event(e).and_then(|e| Some(handler(e)));
-
-            async move {
-                if let Some(fu) = fu {
-                    fu.await
-                } else {
-                    true
-                }
-            }
-        })
+        ListenerBuilder::listening_on(handler).start()
     }
 
     #[inline]
@@ -92,15 +43,7 @@ impl Listener {
         Fu: Send + 'static,
         E: FromEvent,
     {
-        Self::new_always(move |e: Event| {
-            let fu = E::from_event(e).and_then(|e| Some(handler(e)));
-
-            async move {
-                if let Some(fu) = fu {
-                    fu.await;
-                }
-            }
-        })
+        ListenerBuilder::listening_on_always(handler).start()
     }
 
     #[inline]
@@ -143,4 +86,109 @@ impl Listener {
     }
 }
 
+pub struct ListenerBuilder {
+    concurrent: bool,
+    handler: FFIFn<FFIEvent, FFIFuture<bool>>,
+    priority: Priority,
+}
+
+impl ListenerBuilder
+{
+    fn new<F, Fu>(handler: F) -> Self
+        where
+            F: Fn(Event) -> Fu,
+            F: Send + 'static,
+            Fu: Future<Output = bool>,
+            Fu: Send + 'static,
+    {
+        let f = FFIFn::from_static(move |ffi| {
+            let fu = handler(Event::from_ffi(ffi));
+
+            FFIFuture::from_static(async move {
+                crate::runtime::spawn(fu).await.unwrap_or_else(|e| {
+                    error!("监听器发生预料之外的错误, 停止监听: {}", e);
+                    false
+                })
+            })
+        });
+
+        Self {
+            concurrent: true,
+            handler: f,
+            priority: Priority::Middle,
+        }
+    }
+
+    #[inline]
+    fn new_always<F, Fu>(handler: F) -> Self
+        where
+            F: Fn(Event) -> Fu,
+            F: Send + 'static,
+            Fu: Future<Output = ()>,
+            Fu: Send + 'static,
+    {
+        Self::new(move |e: Event| {
+            let fu = handler(e);
+
+            async move {
+                fu.await;
+                true
+            }
+        })
+    }
+
+    #[inline]
+    pub fn listening_on<E, F, Fu>(handler: F) -> Self
+        where
+            F: Fn(E) -> Fu,
+            F: Send + 'static,
+            Fu: Future<Output = bool>,
+            Fu: Send + 'static,
+            E: FromEvent,
+    {
+        Self::new(move |e: Event| {
+            let fu = E::from_event(e).and_then(|e| Some(handler(e)));
+
+            async move {
+                if let Some(fu) = fu {
+                    fu.await
+                } else {
+                    true
+                }
+            }
+        })
+    }
+
+    #[inline]
+    pub fn listening_on_always<E, F, Fu>(handler: F) -> Self
+        where
+            F: Fn(E) -> Fu,
+            F: Send + 'static,
+            Fu: Future<Output = ()>,
+            Fu: Send + 'static,
+            E: FromEvent,
+    {
+        Self::new_always(move |e: Event| {
+            let fu = E::from_event(e).and_then(|e| Some(handler(e)));
+
+            async move {
+                if let Some(fu) = fu {
+                    fu.await;
+                }
+            }
+        })
+    }
+
+    pub fn start(self) -> ListenerGuard {
+        let ma = (get_plugin_manager_vtb().new_listener)(self.concurrent, self.handler, self.priority as u8);
+        ListenerGuard(ma)
+    }
+}
+
 pub struct ListenerGuard(Managed);
+
+impl ListenerGuard {
+    pub fn close(self) {
+        drop(self);
+    }
+}

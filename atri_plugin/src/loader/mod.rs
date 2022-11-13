@@ -12,7 +12,7 @@ pub struct AtriVTable {
         extern "C" fn(manager: *const (), FFIFuture<Managed>) -> FFIFuture<FFIResult<Managed>>,
     pub plugin_manager_block_on: extern "C" fn(manager: *const (), FFIFuture<Managed>) -> Managed,
 
-    pub new_listener: extern "C" fn(FFIFn<FFIEvent, FFIFuture<bool>>) -> Managed,
+    pub new_listener: extern "C" fn(bool, FFIFn<FFIEvent, FFIFuture<bool>>, u8) -> Managed,
     pub listener_next_event_with_priority: extern "C" fn(
         millis: u64,
         filter: FFIFn<FFIEvent, bool>,
