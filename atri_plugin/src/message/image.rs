@@ -1,8 +1,9 @@
 use crate::loader::get_plugin_manager_vtb;
 use crate::message::{MessageValue, PushMessage};
-use atri_ffi::Managed;
+use atri_ffi::ManagedCloneable;
 
-pub struct Image(pub(crate) Managed);
+#[derive(Clone)]
+pub struct Image(pub(crate) ManagedCloneable);
 
 impl Image {
     pub fn id(&self) -> &str {

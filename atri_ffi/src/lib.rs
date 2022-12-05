@@ -81,6 +81,12 @@ pub struct ManagedCloneable {
     clone: extern "C" fn(this: *const ()) -> ManagedCloneable,
 }
 
+impl From<ManagedCloneable> for Managed {
+    fn from(ma: ManagedCloneable) -> Self {
+        ma.value
+    }
+}
+
 impl ManagedCloneable {
     pub fn from_value<T: Clone>(value: T) -> Self {
         extern "C" fn _clone<T: Clone>(this: *const ()) -> ManagedCloneable {
@@ -102,7 +108,9 @@ impl ManagedCloneable {
     /// for option
     pub unsafe fn null() -> Self {
         extern "C" fn _clone_null(_: *const ()) -> ManagedCloneable {
-            panic!("Shouldn't call this because this is null");
+            unsafe {
+                ManagedCloneable::null()
+            }
         }
 
         Self {

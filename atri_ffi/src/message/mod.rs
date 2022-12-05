@@ -1,5 +1,5 @@
 use crate::message::meta::FFIMessageMetadata;
-use crate::{Managed, RustString, RustVec};
+use crate::{Managed, ManagedCloneable, RustString, RustVec};
 use std::mem::ManuallyDrop;
 
 pub mod meta;
@@ -45,16 +45,16 @@ pub struct FFIMessageChain {
 #[repr(C)]
 pub struct FFIMessageValue {
     pub t: u8,
-    pub union: MessageValueUnion,
+    pub union: MessageElementUnion,
 }
 
 #[repr(C)]
-pub union MessageValueUnion {
+pub union MessageElementUnion {
     pub text: ManuallyDrop<RustString>,
-    pub image: ManuallyDrop<Managed>,
+    pub image: ManuallyDrop<ManagedCloneable>,
     pub at: ManuallyDrop<FFIAt>,
     pub at_all: (),
-    pub unknown: ManuallyDrop<Managed>,
+    pub unknown: ManuallyDrop<ManagedCloneable>,
 }
 
 #[repr(C)]

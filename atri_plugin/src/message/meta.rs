@@ -4,7 +4,7 @@ pub trait MetaMessage {
     fn metadata(&self) -> &MessageMetadata;
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct MessageMetadata {
     pub seqs: Vec<i32>,
     pub rands: Vec<i32>,
@@ -20,6 +20,7 @@ impl MetaMessage for MessageMetadata {
     }
 }
 
+#[derive(Default, Clone)]
 pub struct Reply {
     pub reply_seq: i32,
     pub sender: i64,
@@ -27,6 +28,7 @@ pub struct Reply {
     pub elements: Vec<MessageValue>,
 }
 
+#[derive(Default, Debug, Clone)]
 pub struct Anonymous {
     pub anon_id: Vec<u8>,
     pub nick: String,

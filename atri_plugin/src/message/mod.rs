@@ -3,7 +3,7 @@ mod ffi;
 pub mod image;
 pub mod meta;
 
-use atri_ffi::Managed;
+use atri_ffi::ManagedCloneable;
 
 use crate::message::at::At;
 use crate::message::image::Image;
@@ -11,7 +11,7 @@ use crate::message::meta::{Anonymous, MessageMetadata, MetaMessage, Reply};
 use std::slice::Iter;
 use std::{mem, vec};
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct MessageChain {
     meta: MessageMetadata,
     elements: Vec<MessageValue>,
@@ -86,12 +86,13 @@ impl ToString for MessageChain {
     }
 }
 
+#[derive(Clone)]
 pub enum MessageValue {
     Text(String),
     Image(Image),
     At(At),
     AtAll,
-    Unknown(Managed),
+    Unknown(ManagedCloneable),
 }
 
 impl MessageValue {
@@ -170,7 +171,8 @@ impl MessageChainBuilder {
     }
 }
 
-pub struct MessageReceipt(pub(crate) Managed);
+#[derive(Clone)]
+pub struct MessageReceipt(pub(crate) ManagedCloneable);
 
 pub trait PushMessage {
     fn push_to(self, v: &mut Vec<MessageValue>);

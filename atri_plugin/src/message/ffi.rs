@@ -7,7 +7,7 @@ use atri_ffi::message::meta::{
     FFIAnonymous, FFIMessageMetadata, FFIReply, ANONYMOUS_FLAG, NONE_META, REPLY_FLAG,
 };
 use atri_ffi::message::{
-    FFIAt, FFIMessageChain, FFIMessageValue, MessageElementFlag, MessageValueUnion,
+    FFIAt, FFIMessageChain, FFIMessageValue, MessageElementFlag, MessageElementUnion,
 };
 use atri_ffi::{RustString, RustVec};
 use std::mem::{ManuallyDrop, MaybeUninit};
@@ -46,19 +46,19 @@ impl ForFFI for MessageValue {
         match self {
             MessageValue::Text(s) => FFIMessageValue {
                 t: MessageElementFlag::Text.value(),
-                union: MessageValueUnion {
+                union: MessageElementUnion {
                     text: ManuallyDrop::new(RustString::from(s)),
                 },
             },
             MessageValue::Image(img) => FFIMessageValue {
                 t: MessageElementFlag::Image.value(),
-                union: MessageValueUnion {
+                union: MessageElementUnion {
                     image: ManuallyDrop::new(img.0),
                 },
             },
             MessageValue::At(At { target, display }) => FFIMessageValue {
                 t: MessageElementFlag::At.value(),
-                union: MessageValueUnion {
+                union: MessageElementUnion {
                     at: ManuallyDrop::new({
                         let display = RustString::from(display);
                         FFIAt { target, display }
@@ -67,11 +67,11 @@ impl ForFFI for MessageValue {
             },
             MessageValue::AtAll => FFIMessageValue {
                 t: MessageElementFlag::AtAll.value(),
-                union: MessageValueUnion { at_all: () },
+                union: MessageElementUnion { at_all: () },
             },
             MessageValue::Unknown(ma) => FFIMessageValue {
                 t: 255,
-                union: MessageValueUnion {
+                union: MessageElementUnion {
                     unknown: ManuallyDrop::new(ma),
                 },
             },
