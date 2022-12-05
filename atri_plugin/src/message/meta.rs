@@ -1,5 +1,9 @@
 use crate::message::MessageValue;
 
+pub trait MetaMessage {
+    fn metadata(&self) -> &MessageMetadata;
+}
+
 #[derive(Default)]
 pub struct MessageMetadata {
     pub seqs: Vec<i32>,
@@ -8,6 +12,12 @@ pub struct MessageMetadata {
     pub sender: i64,
     pub anonymous: Option<Anonymous>,
     pub reply: Option<Reply>,
+}
+
+impl MetaMessage for MessageMetadata {
+    fn metadata(&self) -> &MessageMetadata {
+        self
+    }
 }
 
 pub struct Reply {

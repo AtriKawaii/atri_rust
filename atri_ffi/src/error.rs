@@ -8,9 +8,9 @@ pub struct FFIResult<T> {
     value: ValueOrError<T>,
 }
 
-unsafe impl<T> Send for FFIResult<T> {}
+unsafe impl<T: Send> Send for FFIResult<T> {}
 
-unsafe impl<T> Sync for FFIResult<T> {}
+unsafe impl<T: Sync> Sync for FFIResult<T> {}
 
 #[repr(C)]
 union ValueOrError<T> {

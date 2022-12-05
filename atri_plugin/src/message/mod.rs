@@ -7,14 +7,14 @@ use atri_ffi::Managed;
 
 use crate::message::at::At;
 use crate::message::image::Image;
-use crate::message::meta::{Anonymous, MessageMetadata, Reply};
+use crate::message::meta::{Anonymous, MessageMetadata, MetaMessage, Reply};
 use std::slice::Iter;
 use std::{mem, vec};
 
 #[derive(Default)]
 pub struct MessageChain {
     meta: MessageMetadata,
-    value: Vec<MessageValue>,
+    elements: Vec<MessageValue>,
 }
 
 impl MessageChain {
@@ -26,7 +26,34 @@ impl MessageChain {
         self.into_iter()
     }
 
+    pub fn into_reply(self) -> Reply {
+        Reply {
+            reply_seq: self.meta.seqs[0],
+            sender: self.meta.sender,
+            time: self.meta.time,
+            elements: self.elements,
+        }
+    }
+
     pub fn metadata(&self) -> &MessageMetadata {
+        &self.meta
+    }
+
+    pub fn metadata_mut(&mut self) -> &mut MessageMetadata {
+        &mut self.meta
+    }
+
+    pub fn with_reply(&mut self, reply: Reply) {
+        self.metadata_mut().reply = Some(reply);
+    }
+
+    pub fn with_anonymous(&mut self, ano: Anonymous) {
+        self.metadata_mut().anonymous = Some(ano);
+    }
+}
+
+impl MetaMessage for MessageChain {
+    fn metadata(&self) -> &MessageMetadata {
         &self.meta
     }
 }
@@ -36,7 +63,7 @@ impl IntoIterator for MessageChain {
     type IntoIter = vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.value.into_iter()
+        self.elements.into_iter()
     }
 }
 
@@ -45,7 +72,7 @@ impl<'a> IntoIterator for &'a MessageChain {
     type IntoIter = Iter<'a, MessageValue>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.value.iter()
+        self.elements.iter()
     }
 }
 
@@ -116,7 +143,7 @@ impl MessageChainBuilder {
     pub fn build(mut self) -> MessageChain {
         self.flush();
         MessageChain {
-            value: self.value,
+            elements: self.value,
             ..Default::default()
         }
     }
@@ -137,7 +164,7 @@ pub trait PushMessage {
 impl<M: PushMessage> From<M> for MessageChain {
     fn from(push: M) -> Self {
         let mut chain = MessageChain::default();
-        push.push_to(&mut chain.value);
+        push.push_to(&mut chain.elements);
         chain
     }
 }
@@ -163,6 +190,6 @@ impl PushMessage for &str {
 impl PushMessage for MessageChainBuilder {
     fn push_to(self, v: &mut Vec<MessageValue>) {
         let chain = self.build();
-        v.extend(chain.value);
+        v.extend(chain.elements);
     }
 }

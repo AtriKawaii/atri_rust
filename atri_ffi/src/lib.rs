@@ -59,7 +59,6 @@ impl Managed {
         *unsafe { Box::from_raw(ma.pointer as _) }
     }
 
-    /// for option
     pub unsafe fn null() -> Self {
         extern "C" fn _drop_null(_: *mut ()) {}
 
@@ -154,7 +153,7 @@ impl RustString {
             capacity: 0,
         }
     }
-    
+
     pub fn is_null(&self) -> bool {
         self.ptr.is_null()
     }

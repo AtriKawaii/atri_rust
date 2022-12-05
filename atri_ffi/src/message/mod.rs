@@ -6,7 +6,7 @@ pub mod meta;
 
 #[repr(u8)]
 #[derive(Copy, Clone)]
-pub enum MessageValueFlag {
+pub enum MessageElementFlag {
     Text = 0,
     Image = 1,
     At = 2,
@@ -14,14 +14,14 @@ pub enum MessageValueFlag {
     Unknown = 255,
 }
 
-impl MessageValueFlag {
+impl MessageElementFlag {
     #[inline]
     pub fn value(self) -> u8 {
         self as u8
     }
 }
 
-impl TryFrom<u8> for MessageValueFlag {
+impl TryFrom<u8> for MessageElementFlag {
     type Error = u8;
 
     fn try_from(flag: u8) -> Result<Self, Self::Error> {
