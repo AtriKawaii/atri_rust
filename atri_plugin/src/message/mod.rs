@@ -144,8 +144,23 @@ impl MessageChainBuilder {
         self.flush();
         MessageChain {
             elements: self.value,
-            ..Default::default()
+            meta: MessageMetadata {
+                seqs: vec![],
+                rands: vec![],
+                time: 0,
+                sender: 0,
+                anonymous: self.anonymous,
+                reply: self.reply,
+            },
         }
+    }
+
+    pub fn with_reply(&mut self, reply: Reply) {
+        self.reply = Some(reply);
+    }
+
+    pub fn with_anonymous(&mut self, ano: Anonymous) {
+        self.anonymous = Some(ano);
     }
 
     fn flush(&mut self) {
