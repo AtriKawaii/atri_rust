@@ -25,14 +25,10 @@ impl Member {
 
 impl Member {
     pub(crate) fn from_ffi(ffi: FFIMember) -> Self {
-        unsafe {
-            if ffi.is_named {
-                let named = NamedMember(ManuallyDrop::into_inner(ffi.inner.named));
-                Self::Named(named)
-            } else {
-                let ano = AnonymousMember(ManuallyDrop::into_inner(ffi.inner.anonymous));
-                Self::Anonymous(ano)
-            }
+        if ffi.is_named {
+            Self::Named(NamedMember(ffi.inner))
+        } else {
+            Self::Anonymous(AnonymousMember(ffi.inner))
         }
     }
 }
