@@ -42,10 +42,14 @@ pub struct AtriVTable {
     pub group_find_member: extern "C" fn(group: *const (), id: i64) -> ManagedCloneable,
     pub group_get_named_member:
         extern "C" fn(group: *const (), id: i64) -> FFIFuture<ManagedCloneable>,
-    pub group_send_message:
-        extern "C" fn(group: *const (), chain: FFIMessageChain) -> FFIFuture<FFIResult<ManagedCloneable>>,
-    pub group_upload_image:
-        extern "C" fn(group: *const (), data: RustVec<u8>) -> FFIFuture<FFIResult<ManagedCloneable>>,
+    pub group_send_message: extern "C" fn(
+        group: *const (),
+        chain: FFIMessageChain,
+    ) -> FFIFuture<FFIResult<ManagedCloneable>>,
+    pub group_upload_image: extern "C" fn(
+        group: *const (),
+        data: RustVec<u8>,
+    ) -> FFIFuture<FFIResult<ManagedCloneable>>,
     pub group_quit: extern "C" fn(group: *const ()) -> FFIFuture<bool>,
     pub group_change_name:
         extern "C" fn(group: *const (), name: RustStr) -> FFIFuture<FFIResult<()>>,
@@ -55,10 +59,14 @@ pub struct AtriVTable {
     pub friend_get_id: extern "C" fn(friend: *const ()) -> i64,
     pub friend_get_nickname: extern "C" fn(friend: *const ()) -> RustStr,
     pub friend_get_client: extern "C" fn(friend: *const ()) -> ManagedCloneable,
-    pub friend_send_message:
-        extern "C" fn(friend: *const (), chain: FFIMessageChain) -> FFIFuture<FFIResult<ManagedCloneable>>,
-    pub friend_upload_image:
-        extern "C" fn(friend: *const (), img: RustVec<u8>) -> FFIFuture<FFIResult<ManagedCloneable>>,
+    pub friend_send_message: extern "C" fn(
+        friend: *const (),
+        chain: FFIMessageChain,
+    ) -> FFIFuture<FFIResult<ManagedCloneable>>,
+    pub friend_upload_image: extern "C" fn(
+        friend: *const (),
+        img: RustVec<u8>,
+    ) -> FFIFuture<FFIResult<ManagedCloneable>>,
 
     pub named_member_get_id: extern "C" fn(named: *const ()) -> i64,
     pub named_member_get_nickname: extern "C" fn(named: *const ()) -> RustStr,
