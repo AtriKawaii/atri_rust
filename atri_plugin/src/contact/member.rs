@@ -2,8 +2,6 @@ use crate::client::Client;
 use atri_ffi::contact::FFIMember;
 use atri_ffi::{ManagedCloneable, RustStr};
 use std::fmt::{Display, Formatter};
-use std::mem::ManuallyDrop;
-
 use crate::contact::group::Group;
 use crate::error::AtriError;
 use crate::loader::get_plugin_manager_vtb;
@@ -68,7 +66,7 @@ impl NamedMember {
         let fu = (get_plugin_manager_vtb().named_member_change_card_name)(self.0.pointer, rs);
 
         let result = crate::runtime::spawn(fu).await.unwrap();
-        Result::from(result).map_err(|s| AtriError::ClientError(s))
+        Result::from(result).map_err(AtriError::ClientError)
     }
 }
 
