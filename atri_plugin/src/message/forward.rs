@@ -1,14 +1,70 @@
 use crate::message::MessageChain;
 
+#[derive(Default, Clone)]
 pub struct ForwardMessage(Vec<ForwardNode>);
 
 impl ForwardMessage {
+    pub fn new() -> Self {
+        Self(vec![])
+    }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self(Vec::with_capacity(capacity))
+    }
+
     pub fn len(&self) -> usize {
         self.0.len()
     }
 
     pub fn iter(&self) -> std::slice::Iter<ForwardNode> {
         self.0.iter()
+    }
+
+    pub fn push(&mut self, node: ForwardNode) {
+        self.0.push(node);
+    }
+
+    pub fn push_node<I: IntoForwardNode>(&mut self, info: ForwardNodeInfo, node: I) {
+        self.push(node.into_node(info))
+    }
+
+    pub fn push_message<M: Into<MessageChain>>(&mut self, info: ForwardNodeInfo, msg: M) {
+        self.push(ForwardNode::NormalMessage {
+            info,
+            chain: msg.into(),
+        })
+    }
+
+    pub fn push_forward<M: Into<ForwardMessage>>(&mut self, info: ForwardNodeInfo, msg: M) {
+        self.push(ForwardNode::ForwardMessage {
+            info,
+            forward: msg.into(),
+        })
+    }
+}
+
+pub trait IntoForwardNode {
+    fn into_node(self, info: ForwardNodeInfo) -> ForwardNode;
+}
+
+impl IntoForwardNode for MessageChain {
+    fn into_node(self, info: ForwardNodeInfo) -> ForwardNode {
+        ForwardNode::NormalMessage { info, chain: self }
+    }
+}
+
+impl IntoForwardNode for ForwardMessage {
+    fn into_node(self, info: ForwardNodeInfo) -> ForwardNode {
+        ForwardNode::ForwardMessage {
+            info,
+            forward: self,
+        }
+    }
+}
+
+impl IntoForwardNode for ForwardNode {
+    fn into_node(self, _: ForwardNodeInfo) -> ForwardNode {
+        self
     }
 }
 
@@ -21,6 +77,7 @@ impl IntoIterator for ForwardMessage {
     }
 }
 
+#[derive(Clone)]
 pub enum ForwardNode {
     NormalMessage {
         info: ForwardNodeInfo,
@@ -32,6 +89,7 @@ pub enum ForwardNode {
     },
 }
 
+#[derive(Default, Debug, Clone)]
 pub struct ForwardNodeInfo {
     pub sender_id: i64,
     pub sender_name: String,
