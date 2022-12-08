@@ -40,6 +40,6 @@ impl PluginRuntime {
             Managed::from_value(value)
         });
         let managed = (get_plugin_manager_vtb().plugin_manager_block_on)(get_plugin_manager(), ffi);
-        managed.into_value()
+        unsafe { managed.into_value() }
     }
 }

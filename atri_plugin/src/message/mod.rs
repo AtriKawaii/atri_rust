@@ -22,7 +22,7 @@ use std::{mem, vec};
 #[derive(Default, Clone)]
 pub struct MessageChain {
     meta: MessageMetadata,
-    elements: Vec<MessageValue>,
+    elements: Vec<MessageElement>,
 }
 
 impl MessageChain {
@@ -30,7 +30,7 @@ impl MessageChain {
         MessageChainBuilder::new()
     }
 
-    pub fn iter(&self) -> Iter<MessageValue> {
+    pub fn iter(&self) -> Iter<MessageElement> {
         self.into_iter()
     }
 
@@ -73,7 +73,7 @@ impl MessageChain {
 }
 
 impl IntoIterator for MessageChain {
-    type Item = MessageValue;
+    type Item = MessageElement;
     type IntoIter = vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -82,8 +82,8 @@ impl IntoIterator for MessageChain {
 }
 
 impl<'a> IntoIterator for &'a MessageChain {
-    type Item = &'a MessageValue;
-    type IntoIter = Iter<'a, MessageValue>;
+    type Item = &'a MessageElement;
+    type IntoIter = Iter<'a, MessageElement>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.elements.iter()
@@ -101,7 +101,7 @@ impl ToString for MessageChain {
 }
 
 #[derive(Clone)]
-pub enum MessageValue {
+pub enum MessageElement {
     Text(String),
     Image(Image),
     At(At),
@@ -110,7 +110,7 @@ pub enum MessageValue {
     Unknown(ManagedCloneable),
 }
 
-impl MessageValue {
+impl MessageElement {
     fn push_to_string(&self, str: &mut String) {
         match self {
             Self::Text(text) => str.push_str(text),
@@ -129,7 +129,7 @@ impl MessageValue {
     }
 }
 
-impl ToString for MessageValue {
+impl ToString for MessageElement {
     fn to_string(&self) -> String {
         let mut s = String::new();
         self.push_to_string(&mut s);
@@ -141,7 +141,7 @@ impl ToString for MessageValue {
 pub struct MessageChainBuilder {
     anonymous: Option<Anonymous>,
     reply: Option<Reply>,
-    value: Vec<MessageValue>,
+    value: Vec<MessageElement>,
     buf: String,
 }
 
@@ -186,13 +186,13 @@ impl MessageChainBuilder {
 
     fn flush(&mut self) {
         let buf = mem::take(&mut self.buf);
-        let text = MessageValue::Text(buf);
+        let text = MessageElement::Text(buf);
         self.value.push(text);
     }
 }
 
 pub trait PushMessage {
-    fn push_to(self, v: &mut Vec<MessageValue>);
+    fn push_to(self, v: &mut Vec<MessageElement>);
 }
 
 impl<M: PushMessage> From<M> for MessageChain {
@@ -203,26 +203,26 @@ impl<M: PushMessage> From<M> for MessageChain {
     }
 }
 
-impl PushMessage for MessageValue {
-    fn push_to(self, v: &mut Vec<MessageValue>) {
+impl PushMessage for MessageElement {
+    fn push_to(self, v: &mut Vec<MessageElement>) {
         v.push(self);
     }
 }
 
 impl PushMessage for String {
-    fn push_to(self, v: &mut Vec<MessageValue>) {
-        v.push(MessageValue::Text(self));
+    fn push_to(self, v: &mut Vec<MessageElement>) {
+        v.push(MessageElement::Text(self));
     }
 }
 
 impl PushMessage for &str {
-    fn push_to(self, v: &mut Vec<MessageValue>) {
+    fn push_to(self, v: &mut Vec<MessageElement>) {
         String::from(self).push_to(v);
     }
 }
 
 impl PushMessage for MessageChainBuilder {
-    fn push_to(self, v: &mut Vec<MessageValue>) {
+    fn push_to(self, v: &mut Vec<MessageElement>) {
         let chain = self.build();
         v.extend(chain.elements);
     }

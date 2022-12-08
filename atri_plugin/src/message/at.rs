@@ -1,4 +1,4 @@
-use crate::message::{MessageValue, PushMessage};
+use crate::message::{MessageElement, PushMessage};
 
 #[derive(Clone)]
 pub struct At {
@@ -7,7 +7,7 @@ pub struct At {
 }
 
 impl PushMessage for At {
-    fn push_to(self, v: &mut Vec<MessageValue>) {
-        v.push(MessageValue::At(self));
+    fn push_to(self, v: &mut Vec<MessageElement>) {
+        v.push(MessageElement::At(self));
     }
 }

@@ -1,4 +1,4 @@
-use crate::message::MessageValue;
+use crate::message::MessageElement;
 
 #[derive(Debug, Clone, Default)]
 pub struct MessageReceipt {
@@ -22,7 +22,7 @@ pub struct Reply {
     pub reply_seq: i32,
     pub sender: i64,
     pub time: i32,
-    pub elements: Vec<MessageValue>,
+    pub elements: Vec<MessageElement>,
 }
 
 #[derive(Default, Debug, Clone)]

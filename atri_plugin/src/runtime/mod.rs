@@ -38,7 +38,7 @@ impl<T> Future for JoinHandle<T> {
         match pin.poll(cx) {
             Poll::Ready(ffi) => {
                 let result = match Result::from(ffi) {
-                    Ok(val) => Ok(val.into_value()),
+                    Ok(val) => Ok(unsafe { val.into_value() }),
                     Err(s) => Err(AtriError::JoinError(s)),
                 };
                 Poll::Ready(result)

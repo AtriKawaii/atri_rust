@@ -1,5 +1,5 @@
 use crate::loader::get_plugin_manager_vtb;
-use crate::message::{MessageValue, PushMessage};
+use crate::message::{MessageElement, PushMessage};
 use atri_ffi::ManagedCloneable;
 
 #[derive(Clone)]
@@ -18,7 +18,7 @@ impl Image {
 }
 
 impl PushMessage for Image {
-    fn push_to(self, v: &mut Vec<MessageValue>) {
-        v.push(MessageValue::Image(self));
+    fn push_to(self, v: &mut Vec<MessageElement>) {
+        v.push(MessageElement::Image(self));
     }
 }
