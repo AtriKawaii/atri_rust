@@ -4,6 +4,7 @@ mod ffi;
 pub mod forward;
 pub mod image;
 pub mod meta;
+pub mod macros;
 
 use atri_ffi::{ManagedCloneable, RustStr};
 

@@ -28,7 +28,7 @@ pub enum ForwardNode {
     },
     ForwardMessage {
         info: ForwardNodeInfo,
-        msg: ForwardMessage,
+        forward: ForwardMessage,
     },
 }
 
@@ -58,7 +58,7 @@ mod ffi {
                         normal: ManuallyDrop::new(chain.into_ffi()),
                     },
                 },
-                Self::ForwardMessage { info, msg } => FFIForwardNode {
+                Self::ForwardMessage { info, forward: msg } => FFIForwardNode {
                     is_normal: false,
                     info: info.into_ffi(),
                     inner: ForwardNodeUnion {
@@ -84,7 +84,7 @@ mod ffi {
                 } else {
                     Self::ForwardMessage {
                         info: ForwardNodeInfo::from_ffi(info),
-                        msg: ForwardMessage::from_ffi(ManuallyDrop::into_inner(inner.forward)),
+                        forward: ForwardMessage::from_ffi(ManuallyDrop::into_inner(inner.forward)),
                     }
                 }
             }
