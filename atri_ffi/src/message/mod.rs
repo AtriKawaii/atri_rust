@@ -52,6 +52,13 @@ pub struct FFIMessageElement {
 }
 
 #[repr(C)]
+pub struct FFIMessageReceipt {
+    pub seqs: RustVec<i32>,
+    pub rands: RustVec<i32>,
+    pub time: i64,
+}
+
+#[repr(C)]
 pub union MessageElementUnion {
     pub text: ManuallyDrop<RustString>,
     pub image: ManuallyDrop<ManagedCloneable>,
