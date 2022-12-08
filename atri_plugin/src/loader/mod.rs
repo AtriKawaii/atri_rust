@@ -3,6 +3,7 @@ use atri_ffi::contact::FFIMember;
 use atri_ffi::error::FFIResult;
 use atri_ffi::ffi::{AtriManager, FFIEvent};
 use atri_ffi::future::FFIFuture;
+use atri_ffi::message::forward::FFIForwardNode;
 use atri_ffi::message::{FFIMessageChain, FFIMessageReceipt};
 use atri_ffi::{FFIOption, Managed, ManagedCloneable, RustStr, RustString, RustVec};
 use std::mem::MaybeUninit;
@@ -53,6 +54,10 @@ pub struct AtriVTable {
     pub group_quit: extern "C" fn(group: *const ()) -> FFIFuture<bool>,
     pub group_change_name:
         extern "C" fn(group: *const (), name: RustStr) -> FFIFuture<FFIResult<()>>,
+    pub group_send_forward_message: extern "C" fn(
+        group: *const (),
+        msg: RustVec<FFIForwardNode>,
+    ) -> FFIFuture<FFIResult<FFIMessageReceipt>>,
 
     pub friend_message_event_get_friend: extern "C" fn(event: *const ()) -> ManagedCloneable,
     pub friend_message_event_get_message: extern "C" fn(event: *const ()) -> FFIMessageChain,
@@ -136,6 +141,7 @@ unsafe extern "C" fn atri_manager_init(manager: AtriManager) {
         group_upload_image => 407,
         group_quit => 408,
         group_change_name => 409,
+        group_send_forward_message => 410,
 
         friend_get_id => 500,
         friend_get_nickname => 501,

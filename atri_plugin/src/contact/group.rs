@@ -2,6 +2,7 @@ use crate::client::Client;
 use crate::contact::member::NamedMember;
 use crate::error::{AtriError, AtriResult};
 use crate::loader::get_plugin_manager_vtb;
+use crate::message::forward::ForwardMessage;
 use crate::message::image::Image;
 use crate::message::meta::MessageReceipt;
 use crate::message::MessageChain;
@@ -73,20 +74,33 @@ impl Group {
         };
 
         let res = crate::runtime::spawn(fu).await.unwrap();
-        match Result::from(res) {
-            Ok(ffi) => Ok(MessageReceipt::from_ffi(ffi)),
-            Err(s) => Err(AtriError::ClientError(s)),
-        }
+        Result::from(res)
+            .map(MessageReceipt::from_ffi)
+            .map_err(AtriError::ClientError)
+    }
+
+    pub async fn send_forward_message<M: Into<ForwardMessage>>(
+        &self,
+        msg: M,
+    ) -> AtriResult<MessageReceipt> {
+        let fu = {
+            let ffi = msg.into().into_ffi();
+            (get_plugin_manager_vtb().group_send_forward_message)(self.0.pointer, ffi)
+        };
+
+        let res = crate::runtime::spawn(fu).await.unwrap();
+        Result::from(res)
+            .map(MessageReceipt::from_ffi)
+            .map_err(AtriError::ClientError)
     }
 
     pub async fn upload_image(&self, image: Vec<u8>) -> AtriResult<Image> {
         let fu = { (get_plugin_manager_vtb().group_upload_image)(self.0.pointer, image.into()) };
 
         let result = crate::runtime::spawn(fu).await.unwrap();
-        match Result::from(result) {
-            Ok(ma) => Ok(Image(ma)),
-            Err(e) => Err(AtriError::ClientError(e)),
-        }
+        Result::from(result)
+            .map(Image)
+            .map_err(AtriError::ClientError)
     }
 
     pub async fn change_name(&self, name: &str) -> AtriResult<()> {
