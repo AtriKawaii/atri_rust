@@ -1,6 +1,6 @@
-use std::mem::ManuallyDrop;
 use crate::message::FFIMessageChain;
 use crate::{RustString, RustVec};
+use std::mem::ManuallyDrop;
 
 #[repr(C)]
 pub struct FFIForwardNodeInfo {
@@ -18,5 +18,5 @@ pub struct FFIForwardNode {
 #[repr(C)]
 pub union ForwardNodeUnion {
     pub normal: ManuallyDrop<FFIMessageChain>,
-    pub forward: ManuallyDrop<RustVec<FFIForwardNode>>
+    pub forward: ManuallyDrop<RustVec<FFIForwardNode>>,
 }

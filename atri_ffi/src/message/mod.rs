@@ -2,8 +2,8 @@ use crate::message::meta::FFIMessageMetadata;
 use crate::{Managed, ManagedCloneable, RustString, RustVec};
 use std::mem::ManuallyDrop;
 
-pub mod meta;
 pub mod forward;
+pub mod meta;
 
 #[repr(u8)]
 #[derive(Copy, Clone)]
