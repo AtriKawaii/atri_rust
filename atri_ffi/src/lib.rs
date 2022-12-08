@@ -54,9 +54,13 @@ impl Managed {
         self.pointer
     }
 
-    pub fn into_value<T>(self) -> T {
+    /// Consume this managed value, turning it into the type
+    ///
+    /// Safety: This is unsafe because we don't know the type
+    /// behind the raw pointer
+    pub unsafe fn into_value<T>(self) -> T {
         let ma = ManuallyDrop::new(self);
-        *unsafe { Box::from_raw(ma.pointer as _) }
+        *Box::from_raw(ma.pointer as _)
     }
 
     pub unsafe fn null() -> Self {
@@ -101,16 +105,14 @@ impl ManagedCloneable {
         }
     }
 
-    pub fn into_value<T>(self) -> T {
+    pub unsafe fn into_value<T>(self) -> T {
         self.value.into_value()
     }
 
     /// for option
     pub unsafe fn null() -> Self {
         extern "C" fn _clone_null(_: *const ()) -> ManagedCloneable {
-            unsafe {
-                ManagedCloneable::null()
-            }
+            unsafe { ManagedCloneable::null() }
         }
 
         Self {
@@ -398,7 +400,7 @@ mod tests {
         };
         let test0 = test.clone();
         let managed = Managed::from_value(test);
-        let test: Test = managed.into_value();
+        let test: Test = unsafe { managed.into_value() };
 
         assert_eq!(test, test0);
     }
