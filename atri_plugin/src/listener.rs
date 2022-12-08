@@ -200,6 +200,7 @@ impl ListenerBuilder {
     }
 }
 
+#[must_use = "if unused the Listener will immediately close"]
 pub struct ListenerGuard(Managed);
 
 impl ListenerGuard {
