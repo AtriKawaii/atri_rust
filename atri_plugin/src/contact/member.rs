@@ -1,10 +1,10 @@
 use crate::client::Client;
-use atri_ffi::contact::FFIMember;
-use atri_ffi::{ManagedCloneable, RustStr};
-use std::fmt::{Display, Formatter};
 use crate::contact::group::Group;
 use crate::error::AtriError;
 use crate::loader::get_plugin_manager_vtb;
+use atri_ffi::contact::FFIMember;
+use atri_ffi::{ManagedCloneable, RustStr};
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone)]
 pub enum Member {

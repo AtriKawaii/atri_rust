@@ -82,6 +82,9 @@ pub struct AtriVTable {
     pub log: extern "C" fn(handle: usize, manager: *const (), level: u8, log: RustStr),
 
     pub env_get_workspace: extern "C" fn(handle: usize, manager: *const ()) -> RustString,
+
+    pub message_chain_to_json: extern "C" fn(chain: FFIMessageChain) -> RustString,
+    pub message_chain_from_json: extern "C" fn(json: RustStr) -> FFIResult<FFIMessageChain>,
 }
 
 static mut ATRI_MANAGER: MaybeUninit<AtriManager> = MaybeUninit::uninit();
@@ -160,6 +163,9 @@ unsafe extern "C" fn atri_manager_init(manager: AtriManager) {
         log => 20000,
 
         env_get_workspace => 30000,
+
+        message_chain_to_json => 30100,
+        message_chain_from_json => 30101,
     };
 
     ATRI_VTABLE.write(vtable);

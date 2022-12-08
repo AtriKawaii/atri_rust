@@ -1,13 +1,20 @@
 pub mod at;
+pub mod face;
 mod ffi;
+pub mod forward;
 pub mod image;
 pub mod meta;
 
-use atri_ffi::ManagedCloneable;
+use atri_ffi::{ManagedCloneable, RustStr};
 
+use crate::error::{AtriError, AtriResult};
+use crate::loader::get_plugin_manager_vtb;
 use crate::message::at::At;
+use crate::message::face::Face;
 use crate::message::image::Image;
 use crate::message::meta::{Anonymous, MessageMetadata, MetaMessage, Reply};
+use atri_ffi::ffi::ForFFI;
+use std::fmt::Write;
 use std::slice::Iter;
 use std::{mem, vec};
 
@@ -49,6 +56,18 @@ impl MessageChain {
 
     pub fn with_anonymous(&mut self, ano: Anonymous) {
         self.metadata_mut().anonymous = Some(ano);
+    }
+
+    pub fn to_json(&self) -> String {
+        (get_plugin_manager_vtb().message_chain_to_json)(self.clone().into_ffi()).into()
+    }
+
+    pub fn from_json(json: &str) -> AtriResult<Self> {
+        let rs = RustStr::from(json);
+        let result = (get_plugin_manager_vtb().message_chain_from_json)(rs);
+        Result::from(result)
+            .map(MessageChain::from_ffi)
+            .map_err(AtriError::SerializationError)
     }
 }
 
@@ -92,6 +111,7 @@ pub enum MessageValue {
     Image(Image),
     At(At),
     AtAll,
+    Face(Face),
     Unknown(ManagedCloneable),
 }
 
@@ -99,11 +119,16 @@ impl MessageValue {
     fn push_to_string(&self, str: &mut String) {
         match self {
             Self::Text(text) => str.push_str(text),
-            Self::Image(img) => str.push_str(&format!("[Image:{}]", img.url())),
-            Self::At(At { target, display }) => {
-                str.push_str(&format!("[At:{}({})]", target, display))
+            Self::Image(img) => {
+                let _ = write!(str, "$[Image:{}]", img.url());
             }
-            Self::AtAll => str.push_str("[AtAll]"),
+            Self::At(At { target, display }) => {
+                let _ = write!(str, "$[At:{}({})]", display, target);
+            }
+            Self::AtAll => str.push_str("$[AtAll]"),
+            Self::Face(face) => {
+                let _ = write!(str, "$[Face:{}]", face.name);
+            }
             Self::Unknown(_) => {}
         }
     }

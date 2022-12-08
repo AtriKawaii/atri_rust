@@ -241,7 +241,7 @@ impl ToString for RustStr {
 }
 
 #[repr(C)]
-pub struct RustVec<T> {
+pub struct RustVec<T: ?Sized> {
     ptr: *mut T,
     len: usize,
     capacity: usize,

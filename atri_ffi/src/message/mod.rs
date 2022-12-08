@@ -3,6 +3,7 @@ use crate::{Managed, ManagedCloneable, RustString, RustVec};
 use std::mem::ManuallyDrop;
 
 pub mod meta;
+pub mod forward;
 
 #[repr(u8)]
 #[derive(Copy, Clone)]
@@ -11,6 +12,7 @@ pub enum MessageElementFlag {
     Image = 1,
     At = 2,
     AtAll = 3,
+    Face = 4,
     Unknown = 255,
 }
 
@@ -30,6 +32,7 @@ impl TryFrom<u8> for MessageElementFlag {
             1 => Self::Image,
             2 => Self::At,
             3 => Self::AtAll,
+            4 => Self::Face,
             255 => Self::Unknown,
             _ => return Err(flag),
         })
@@ -39,11 +42,11 @@ impl TryFrom<u8> for MessageElementFlag {
 #[repr(C)]
 pub struct FFIMessageChain {
     pub meta: FFIMessageMetadata,
-    pub inner: RustVec<FFIMessageValue>,
+    pub inner: RustVec<FFIMessageElement>,
 }
 
 #[repr(C)]
-pub struct FFIMessageValue {
+pub struct FFIMessageElement {
     pub t: u8,
     pub union: MessageElementUnion,
 }
@@ -54,6 +57,7 @@ pub union MessageElementUnion {
     pub image: ManuallyDrop<ManagedCloneable>,
     pub at: ManuallyDrop<FFIAt>,
     pub at_all: (),
+    pub face: ManuallyDrop<FFIFace>,
     pub unknown: ManuallyDrop<ManagedCloneable>,
 }
 
@@ -73,4 +77,10 @@ pub union ImageUnion {
 pub struct FFIAt {
     pub target: i64,
     pub display: RustString,
+}
+
+#[repr(C)]
+pub struct FFIFace {
+    pub index: i32,
+    pub name: RustString,
 }

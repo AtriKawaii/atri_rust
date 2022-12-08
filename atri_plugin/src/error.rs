@@ -6,6 +6,7 @@ pub type AtriResult<T> = Result<T, AtriError>;
 pub enum AtriError {
     JoinError(String),
     ClientError(String),
+    SerializationError(String),
     NotSupported,
 }
 

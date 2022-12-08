@@ -1,4 +1,4 @@
-use crate::message::FFIMessageValue;
+use crate::message::FFIMessageElement;
 use crate::{RustString, RustVec};
 use std::mem::MaybeUninit;
 
@@ -33,5 +33,5 @@ pub struct FFIReply {
     pub reply_seq: i32,
     pub sender: i64,
     pub time: i32,
-    pub elements: RustVec<FFIMessageValue>,
+    pub elements: RustVec<FFIMessageElement>,
 }
