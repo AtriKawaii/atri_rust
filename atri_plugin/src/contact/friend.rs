@@ -2,7 +2,8 @@ use crate::client::Client;
 use crate::error::AtriError;
 use crate::loader::get_plugin_manager_vtb;
 use crate::message::image::Image;
-use crate::message::{MessageChain, MessageReceipt};
+use crate::message::meta::MessageReceipt;
+use crate::message::MessageChain;
 use atri_ffi::ffi::ForFFI;
 use atri_ffi::{ManagedCloneable, RustVec};
 use std::fmt::{Display, Formatter};
@@ -37,7 +38,7 @@ impl Friend {
 
         let result = Result::from(crate::runtime::spawn(fu).await.unwrap());
         match result {
-            Ok(ma) => Ok(MessageReceipt(ma)),
+            Ok(ffi) => Ok(MessageReceipt::from_ffi(ffi)),
             Err(s) => Err(AtriError::ClientError(s)),
         }
     }

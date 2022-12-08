@@ -3,7 +3,8 @@ use crate::contact::group::Group;
 use crate::contact::member::Member;
 use crate::error::AtriError;
 use crate::message::image::Image;
-use crate::message::{MessageChain, MessageReceipt};
+use crate::message::meta::MessageReceipt;
+use crate::message::MessageChain;
 
 pub mod friend;
 pub mod group;
@@ -34,8 +35,7 @@ impl Contact {
         match self {
             Self::Friend(f) => f.send_message(chain).await,
             Self::Group(g) => g.send_message(chain).await,
-            Self::Member(_) => todo!(),
-            Self::Stranger => todo!(),
+            Self::Member(_) | Self::Stranger => Err(AtriError::NotSupported),
         }
     }
 }

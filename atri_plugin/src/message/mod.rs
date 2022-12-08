@@ -3,8 +3,8 @@ pub mod face;
 mod ffi;
 pub mod forward;
 pub mod image;
-pub mod meta;
 pub mod macros;
+pub mod meta;
 
 use atri_ffi::{ManagedCloneable, RustStr};
 
@@ -13,7 +13,7 @@ use crate::loader::get_plugin_manager_vtb;
 use crate::message::at::At;
 use crate::message::face::Face;
 use crate::message::image::Image;
-use crate::message::meta::{Anonymous, MessageMetadata, MetaMessage, Reply};
+use crate::message::meta::{Anonymous, MessageMetadata, Reply};
 use atri_ffi::ffi::ForFFI;
 use std::fmt::Write;
 use std::slice::Iter;
@@ -69,12 +69,6 @@ impl MessageChain {
         Result::from(result)
             .map(MessageChain::from_ffi)
             .map_err(AtriError::SerializationError)
-    }
-}
-
-impl MetaMessage for MessageChain {
-    fn metadata(&self) -> &MessageMetadata {
-        &self.meta
     }
 }
 
@@ -196,9 +190,6 @@ impl MessageChainBuilder {
         self.value.push(text);
     }
 }
-
-#[derive(Clone)]
-pub struct MessageReceipt(pub(crate) ManagedCloneable);
 
 pub trait PushMessage {
     fn push_to(self, v: &mut Vec<MessageValue>);

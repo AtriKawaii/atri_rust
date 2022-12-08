@@ -1,7 +1,10 @@
 use crate::message::MessageValue;
 
-pub trait MetaMessage {
-    fn metadata(&self) -> &MessageMetadata;
+#[derive(Debug, Clone, Default)]
+pub struct MessageReceipt {
+    pub seqs: Vec<i32>,
+    pub rands: Vec<i32>,
+    pub time: i64,
 }
 
 #[derive(Default, Clone)]
@@ -12,12 +15,6 @@ pub struct MessageMetadata {
     pub sender: i64,
     pub anonymous: Option<Anonymous>,
     pub reply: Option<Reply>,
-}
-
-impl MetaMessage for MessageMetadata {
-    fn metadata(&self) -> &MessageMetadata {
-        self
-    }
 }
 
 #[derive(Default, Clone)]
@@ -36,4 +33,32 @@ pub struct Anonymous {
     pub bubble_index: i32,
     pub expire_time: i32,
     pub color: String,
+}
+
+mod ffi {
+    use crate::message::meta::MessageReceipt;
+    use atri_ffi::ffi::ForFFI;
+    use atri_ffi::message::FFIMessageReceipt;
+
+    impl ForFFI for MessageReceipt {
+        type FFIValue = FFIMessageReceipt;
+
+        fn into_ffi(self) -> Self::FFIValue {
+            let MessageReceipt { seqs, rands, time } = self;
+
+            FFIMessageReceipt {
+                seqs: seqs.into(),
+                rands: rands.into(),
+                time,
+            }
+        }
+
+        fn from_ffi(FFIMessageReceipt { seqs, rands, time }: Self::FFIValue) -> Self {
+            Self {
+                seqs: seqs.into_vec(),
+                rands: rands.into_vec(),
+                time,
+            }
+        }
+    }
 }

@@ -3,7 +3,7 @@ use atri_ffi::contact::FFIMember;
 use atri_ffi::error::FFIResult;
 use atri_ffi::ffi::{AtriManager, FFIEvent};
 use atri_ffi::future::FFIFuture;
-use atri_ffi::message::FFIMessageChain;
+use atri_ffi::message::{FFIMessageChain, FFIMessageReceipt};
 use atri_ffi::{FFIOption, Managed, ManagedCloneable, RustStr, RustString, RustVec};
 use std::mem::MaybeUninit;
 
@@ -45,7 +45,7 @@ pub struct AtriVTable {
     pub group_send_message: extern "C" fn(
         group: *const (),
         chain: FFIMessageChain,
-    ) -> FFIFuture<FFIResult<ManagedCloneable>>,
+    ) -> FFIFuture<FFIResult<FFIMessageReceipt>>,
     pub group_upload_image: extern "C" fn(
         group: *const (),
         data: RustVec<u8>,
@@ -62,7 +62,7 @@ pub struct AtriVTable {
     pub friend_send_message: extern "C" fn(
         friend: *const (),
         chain: FFIMessageChain,
-    ) -> FFIFuture<FFIResult<ManagedCloneable>>,
+    ) -> FFIFuture<FFIResult<FFIMessageReceipt>>,
     pub friend_upload_image: extern "C" fn(
         friend: *const (),
         img: RustVec<u8>,

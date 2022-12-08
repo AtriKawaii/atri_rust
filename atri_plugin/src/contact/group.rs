@@ -1,9 +1,10 @@
 use crate::client::Client;
 use crate::contact::member::NamedMember;
-use crate::error::AtriError;
+use crate::error::{AtriError, AtriResult};
 use crate::loader::get_plugin_manager_vtb;
 use crate::message::image::Image;
-use crate::message::{MessageChain, MessageReceipt};
+use crate::message::meta::MessageReceipt;
+use crate::message::MessageChain;
 use atri_ffi::error::FFIResult;
 use atri_ffi::ffi::ForFFI;
 use atri_ffi::message::FFIMessageChain;
@@ -65,7 +66,7 @@ impl Group {
     pub async fn send_message<M: Into<MessageChain>>(
         &self,
         chain: M,
-    ) -> Result<MessageReceipt, AtriError> {
+    ) -> AtriResult<MessageReceipt> {
         let fu = {
             let ffi: FFIMessageChain = chain.into().into_ffi();
             (get_plugin_manager_vtb().group_send_message)(self.0.pointer, ffi)
@@ -73,12 +74,12 @@ impl Group {
 
         let res = crate::runtime::spawn(fu).await.unwrap();
         match Result::from(res) {
-            Ok(ma) => Ok(MessageReceipt(ma)),
+            Ok(ffi) => Ok(MessageReceipt::from_ffi(ffi)),
             Err(s) => Err(AtriError::ClientError(s)),
         }
     }
 
-    pub async fn upload_image(&self, image: Vec<u8>) -> Result<Image, AtriError> {
+    pub async fn upload_image(&self, image: Vec<u8>) -> AtriResult<Image> {
         let fu = { (get_plugin_manager_vtb().group_upload_image)(self.0.pointer, image.into()) };
 
         let result = crate::runtime::spawn(fu).await.unwrap();
@@ -88,7 +89,7 @@ impl Group {
         }
     }
 
-    pub async fn change_name(&self, name: &str) -> Result<(), AtriError> {
+    pub async fn change_name(&self, name: &str) -> AtriResult<()> {
         let rs = RustStr::from(name);
         let fu = { (get_plugin_manager_vtb().group_change_name)(self.0.pointer, rs) };
         let result: FFIResult<()> = crate::runtime::spawn(fu).await.unwrap();
