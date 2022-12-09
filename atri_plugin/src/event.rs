@@ -5,6 +5,7 @@ use crate::contact::member::Member;
 use crate::listener::Listener;
 use crate::loader::get_plugin_manager_vtb;
 use crate::message::MessageChain;
+use crate::warn;
 use atri_ffi::ffi::{FFIEvent, ForFFI};
 use atri_ffi::ManagedCloneable;
 use std::ops::Deref;
@@ -15,7 +16,7 @@ pub enum Event {
     ClientLogin(ClientLoginEvent),
     GroupMessage(GroupMessageEvent),
     FriendMessage(FriendMessageEvent),
-    Unknown(EventInner),
+    Unknown { raw_tag: u8, inner: EventInner },
 }
 
 impl Event {
@@ -30,7 +31,13 @@ impl Event {
             0 => Self::ClientLogin(ClientLoginEvent(inner)),
             1 => Self::GroupMessage(GroupMessageEvent(inner)),
             2 => Self::FriendMessage(FriendMessageEvent(inner)),
-            _ => Self::Unknown(inner),
+            or => {
+                if or != 255 {
+                    warn!("接受了一个未知事件, tag={}", or);
+                }
+
+                Self::Unknown { raw_tag: or, inner }
+            }
         }
     }
 }
