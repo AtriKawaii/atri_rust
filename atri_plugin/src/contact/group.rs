@@ -43,18 +43,9 @@ impl Group {
         ma.into_iter().map(NamedMember).collect()
     }
 
-    pub fn find_member(&self, id: i64) -> Option<NamedMember> {
-        let ma = (get_plugin_manager_vtb().group_find_member)(self.0.pointer, id);
+    pub async fn find_member(&self, id: i64) -> Option<NamedMember> {
+        let fu = { (get_plugin_manager_vtb().group_find_member)(self.0.pointer, id) };
 
-        if ma.pointer.is_null() {
-            None
-        } else {
-            Some(NamedMember(ma))
-        }
-    }
-
-    pub async fn get_named_member(&self, id: i64) -> Option<NamedMember> {
-        let fu = { (get_plugin_manager_vtb().group_get_named_member)(self.0.pointer, id) };
         let ma = crate::runtime::spawn(fu).await.unwrap();
 
         if ma.pointer.is_null() {

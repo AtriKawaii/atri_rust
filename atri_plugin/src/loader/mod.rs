@@ -40,9 +40,7 @@ pub struct AtriVTable {
     pub group_get_name: extern "C" fn(group: *const ()) -> RustStr,
     pub group_get_client: extern "C" fn(group: *const ()) -> ManagedCloneable,
     pub group_get_members: extern "C" fn(group: *const ()) -> FFIFuture<RustVec<ManagedCloneable>>,
-    pub group_find_member: extern "C" fn(group: *const (), id: i64) -> ManagedCloneable,
-    pub group_get_named_member:
-        extern "C" fn(group: *const (), id: i64) -> FFIFuture<ManagedCloneable>,
+    pub group_find_member: extern "C" fn(group: *const (), id: i64) -> FFIFuture<ManagedCloneable>,
     pub group_send_message: extern "C" fn(
         group: *const (),
         chain: FFIMessageChain,
@@ -58,6 +56,7 @@ pub struct AtriVTable {
         group: *const (),
         msg: RustVec<FFIForwardNode>,
     ) -> FFIFuture<FFIResult<FFIMessageReceipt>>,
+    pub group_invite: extern "C" fn(group: *const (), id: i64) -> FFIFuture<FFIResult<()>>,
 
     pub friend_message_event_get_friend: extern "C" fn(event: *const ()) -> ManagedCloneable,
     pub friend_message_event_get_message: extern "C" fn(event: *const ()) -> FFIMessageChain,
@@ -136,12 +135,13 @@ unsafe extern "C" fn atri_manager_init(manager: AtriManager) {
         group_get_client => 402,
         group_get_members => 403,
         group_find_member => 404,
-        group_get_named_member => 405,
+        // 405
         group_send_message => 406,
         group_upload_image => 407,
         group_quit => 408,
         group_change_name => 409,
         group_send_forward_message => 410,
+        group_invite => 411,
 
         friend_get_id => 500,
         friend_get_nickname => 501,
