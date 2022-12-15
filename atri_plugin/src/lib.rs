@@ -1,5 +1,5 @@
 use atri_ffi::plugin::PluginVTable;
-use atri_ffi::{Managed, RustStr};
+use atri_ffi::RustStr;
 
 pub use atri_macros::plugin;
 
@@ -43,7 +43,7 @@ where
 
 #[doc(hidden)]
 /// 从已实现Plugin的结构体获取一个标准的PluginInstance
-pub fn __get_instance<P: Plugin>(plugin: P, name: &str) -> PluginInstance {
+pub fn __get_instance<P: Plugin>(name: &str) -> PluginInstance {
     extern "C" fn _new<P: Plugin>() -> *mut () {
         let b = Box::new(P::new());
         Box::into_raw(b) as *mut ()
@@ -61,17 +61,22 @@ pub fn __get_instance<P: Plugin>(plugin: P, name: &str) -> PluginInstance {
         p.disable();
     }
 
+    extern "C" fn _drop<T>(ptr: *mut ()) {
+        drop(unsafe {
+            Box::from_raw(ptr.cast::<T>())
+        })
+    }
+
     let should_drop = P::should_drop();
 
-    let instance = Managed::from_value(plugin);
     let vtb = PluginVTable {
         new: _new::<P>,
         enable: _enable::<P>,
         disable: _disable::<P>,
+        drop: _drop::<P>
     };
 
     PluginInstance {
-        instance,
         should_drop,
         vtb,
         abi_ver: atri_ffi::plugin::abi_version(),

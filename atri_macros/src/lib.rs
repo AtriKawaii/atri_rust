@@ -119,11 +119,16 @@ pub fn plugin(attr: TokenStream, input: TokenStream) -> TokenStream {
             "__get_instance",
             Span::call_site(),
         )));
+        group.push(TokenTree::Punct(Punct::new(':', Spacing::Joint)));
+        group.push(TokenTree::Punct(Punct::new(':', Spacing::Alone)));
+        group.push(TokenTree::Punct(Punct::new('<', Spacing::Alone)));
+        group.push(struct_name.clone());
+        group.push(TokenTree::Punct(Punct::new('>', Spacing::Joint)));
 
         // param
         {
             let mut new_instance = Vec::<TokenTree>::new();
-            new_instance.push(TokenTree::Punct(Punct::new('<', Spacing::Alone)));
+            /*new_instance.push(TokenTree::Punct(Punct::new('<', Spacing::Alone)));
             new_instance.push(struct_name.clone());
             new_instance.push(TokenTree::Ident(Ident::new("as", Span::call_site())));
             new_instance.push(TokenTree::Ident(Ident::new(
@@ -141,7 +146,7 @@ pub fn plugin(attr: TokenStream, input: TokenStream) -> TokenStream {
                 Delimiter::Parenthesis,
                 TokenStream::new(),
             )));
-            new_instance.push(TokenTree::Punct(Punct::new(',', Spacing::Joint)));
+            new_instance.push(TokenTree::Punct(Punct::new(',', Spacing::Joint)));*/
             new_instance.push(attrs.get("name").map(TokenTree::clone).unwrap_or_else(|| {
                 TokenTree::Literal(Literal::string(&{
                     let mut s = struct_name.to_string();
