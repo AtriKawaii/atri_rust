@@ -74,6 +74,7 @@ pub fn __get_instance<P: Plugin>(plugin: P, name: &str) -> PluginInstance {
         instance,
         should_drop,
         vtb,
+        abi_ver: atri_ffi::plugin::abi_version(),
         name: RustStr::from(name),
     }
 }
