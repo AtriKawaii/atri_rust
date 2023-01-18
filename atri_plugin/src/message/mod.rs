@@ -9,7 +9,7 @@ pub mod meta;
 use atri_ffi::{ManagedCloneable, RustStr};
 
 use crate::error::{AtriError, AtriResult};
-use crate::loader::get_plugin_manager_vtb;
+use crate::loader::get_vtb;
 use crate::message::at::At;
 use crate::message::face::Face;
 use crate::message::image::Image;
@@ -60,12 +60,12 @@ impl MessageChain {
     }
 
     pub fn to_json(&self) -> String {
-        (get_plugin_manager_vtb().message_chain_to_json)(self.clone().into_ffi()).into()
+        (get_vtb().message_chain_to_json)(self.clone().into_ffi()).into()
     }
 
     pub fn from_json(json: &str) -> AtriResult<Self> {
         let rs = RustStr::from(json);
-        let result = (get_plugin_manager_vtb().message_chain_from_json)(rs);
+        let result = (get_vtb().message_chain_from_json)(rs);
         Result::from(result)
             .map(MessageChain::from_ffi)
             .map_err(AtriError::SerializationError)

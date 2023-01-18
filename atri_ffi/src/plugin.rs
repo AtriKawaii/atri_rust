@@ -16,6 +16,7 @@ pub struct PluginVTable {
     pub drop: extern "C" fn(*mut ()),
 }
 
+#[inline]
 pub const fn abi_version() -> u8 {
     include!("../abi-version")
 }

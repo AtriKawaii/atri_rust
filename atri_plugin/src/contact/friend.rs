@@ -1,6 +1,6 @@
 use crate::client::Client;
 use crate::error::AtriError;
-use crate::loader::get_plugin_manager_vtb;
+use crate::loader::get_vtb;
 use crate::message::image::Image;
 use crate::message::meta::MessageReceipt;
 use crate::message::MessageChain;
@@ -13,17 +13,17 @@ pub struct Friend(pub(crate) ManagedCloneable);
 
 impl Friend {
     pub fn id(&self) -> i64 {
-        (get_plugin_manager_vtb().friend_get_id)(self.0.pointer)
+        (get_vtb().friend_get_id)(self.0.pointer)
     }
 
     pub fn nickname(&self) -> &str {
-        let rs = (get_plugin_manager_vtb().friend_get_nickname)(self.0.pointer);
+        let rs = (get_vtb().friend_get_nickname)(self.0.pointer);
 
         rs.as_str()
     }
 
     pub fn client(&self) -> Client {
-        let ma = (get_plugin_manager_vtb().friend_get_client)(self.0.pointer);
+        let ma = (get_vtb().friend_get_client)(self.0.pointer);
         Client(ma)
     }
 
@@ -33,7 +33,7 @@ impl Friend {
     ) -> Result<MessageReceipt, AtriError> {
         let fu = {
             let ffi = chain.into().into_ffi();
-            (get_plugin_manager_vtb().friend_send_message)(self.0.pointer, ffi)
+            (get_vtb().friend_send_message)(self.0.pointer, ffi)
         };
 
         let result = Result::from(crate::runtime::spawn(fu).await.unwrap());
@@ -44,8 +44,7 @@ impl Friend {
     }
 
     pub async fn upload_image(&self, img: Vec<u8>) -> Result<Image, AtriError> {
-        let fu =
-            { (get_plugin_manager_vtb().friend_upload_image)(self.0.pointer, RustVec::from(img)) };
+        let fu = { (get_vtb().friend_upload_image)(self.0.pointer, RustVec::from(img)) };
         let result = crate::runtime::spawn(fu).await.unwrap();
 
         match Result::from(result) {

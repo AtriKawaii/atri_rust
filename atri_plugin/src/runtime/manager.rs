@@ -1,4 +1,4 @@
-use crate::loader::{get_plugin_manager, get_plugin_manager_vtb};
+use crate::loader::{get_plugin_manager, get_vtb};
 use crate::runtime::JoinHandle;
 use atri_ffi::future::FFIFuture;
 use atri_ffi::Managed;
@@ -22,7 +22,7 @@ impl PluginRuntime {
             Managed::from_value(value)
         });
 
-        let f = (get_plugin_manager_vtb().plugin_manager_spawn)(get_plugin_manager(), ffi);
+        let f = (get_vtb().plugin_manager_spawn)(get_plugin_manager(), ffi);
         let handle = JoinHandle::<F::Output>::from(f);
         handle
     }
@@ -39,7 +39,7 @@ impl PluginRuntime {
 
             Managed::from_value(value)
         });
-        let managed = (get_plugin_manager_vtb().plugin_manager_block_on)(get_plugin_manager(), ffi);
+        let managed = (get_vtb().plugin_manager_block_on)(get_plugin_manager(), ffi);
         unsafe { managed.into_value() }
     }
 }

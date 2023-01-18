@@ -95,7 +95,7 @@ static mut ATRI_MANAGER: MaybeUninit<AtriManager> = MaybeUninit::uninit();
 
 static mut ATRI_VTABLE: MaybeUninit<AtriVTable> = MaybeUninit::uninit();
 
-/// Safety: This function will be called by the plugin manager first
+/// Safety: This function will be called by the plugin manager once
 #[no_mangle]
 unsafe extern "C" fn atri_manager_init(manager: AtriManager) {
     let get_fun = manager.get_fun;
@@ -189,6 +189,6 @@ pub(crate) fn get_plugin_handle() -> usize {
     get_atri_manager().handle
 }
 
-pub(crate) fn get_plugin_manager_vtb() -> &'static AtriVTable {
+pub(crate) fn get_vtb() -> &'static AtriVTable {
     unsafe { ATRI_VTABLE.assume_init_ref() }
 }

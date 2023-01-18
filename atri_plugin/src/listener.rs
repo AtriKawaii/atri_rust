@@ -1,11 +1,13 @@
 use crate::error;
 use crate::event::{Event, FromEvent};
-use crate::loader::get_plugin_manager_vtb;
+use crate::loader::get_vtb;
+use crate::runtime::is_panicked;
 use atri_ffi::closure::FFIFn;
 use atri_ffi::ffi::FFIEvent;
 use atri_ffi::future::FFIFuture;
 use atri_ffi::Managed;
 use std::future::Future;
+use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::time::Duration;
 
 pub struct Listener;
@@ -66,8 +68,7 @@ impl Listener {
         E: Send + 'static,
         F: Fn(&E) -> bool,
     {
-        let ffi = crate::runtime::spawn((get_plugin_manager_vtb()
-            .listener_next_event_with_priority)(
+        let ffi = crate::runtime::spawn((get_vtb().listener_next_event_with_priority)(
             timeout.as_millis() as u64,
             FFIFn::from(|ffi| {
                 let event = Event::from_ffi(ffi);
@@ -101,13 +102,22 @@ impl ListenerBuilder {
         Fu: Send + 'static,
     {
         let f = FFIFn::from_static(move |ffi| {
-            let fu = handler(Event::from_ffi(ffi));
+            if is_panicked() {
+                return FFIFuture::from_static(async { false });
+            }
+
+            let handler = AssertUnwindSafe(&handler);
+            let r = catch_unwind(|| handler(Event::from_ffi(ffi)));
 
             FFIFuture::from_static(async move {
-                crate::runtime::spawn(fu).await.unwrap_or_else(|e| {
-                    error!("监听器发生预料之外的错误, 停止监听: {}", e);
+                if let Ok(fu) = r {
+                    crate::runtime::spawn(fu).await.unwrap_or_else(|e| {
+                        error!("监听器发生预料之外的错误, 停止监听: {}", e);
+                        false
+                    })
+                } else {
                     false
-                })
+                }
             })
         });
 
@@ -191,11 +201,7 @@ impl ListenerBuilder {
     }
 
     pub fn start(self) -> ListenerGuard {
-        let ma = (get_plugin_manager_vtb().new_listener)(
-            self.concurrent,
-            self.handler,
-            self.priority as u8,
-        );
+        let ma = (get_vtb().new_listener)(self.concurrent, self.handler, self.priority as u8);
         ListenerGuard(ma)
     }
 }

@@ -23,8 +23,8 @@ impl Contact {
         match self {
             Self::Friend(f) => f.upload_image(img).await,
             Self::Group(g) => g.upload_image(img).await,
-            Self::Member(_) => Err(AtriError::NotSupported),
-            Self::Stranger => todo!(),
+            Self::Member(_) => Err(AtriError::NotSupported), // fixme
+            Self::Stranger => Err(AtriError::NotSupported),
         }
     }
 
@@ -35,7 +35,7 @@ impl Contact {
         match self {
             Self::Friend(f) => f.send_message(chain).await,
             Self::Group(g) => g.send_message(chain).await,
-            Self::Member(_) | Self::Stranger => Err(AtriError::NotSupported),
+            Self::Member(_) | Self::Stranger => Err(AtriError::NotSupported), // fixme
         }
     }
 }

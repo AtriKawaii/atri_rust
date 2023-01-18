@@ -1,4 +1,4 @@
-use crate::loader::{get_plugin_handle, get_plugin_manager, get_plugin_manager_vtb};
+use crate::loader::{get_plugin_handle, get_plugin_manager, get_vtb};
 use atri_ffi::RustStr;
 
 #[macro_export]
@@ -38,5 +38,5 @@ macro_rules! error {
 
 pub fn __log_info(level: u8, str: &str) {
     let ffi = RustStr::from(str);
-    (get_plugin_manager_vtb().log)(get_plugin_handle(), get_plugin_manager(), level, ffi);
+    (get_vtb().log)(get_plugin_handle(), get_plugin_manager(), level, ffi);
 }

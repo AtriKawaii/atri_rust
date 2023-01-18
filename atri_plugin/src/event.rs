@@ -3,7 +3,7 @@ use crate::contact::friend::Friend;
 use crate::contact::group::Group;
 use crate::contact::member::Member;
 use crate::listener::Listener;
-use crate::loader::get_plugin_manager_vtb;
+use crate::loader::get_vtb;
 use crate::message::MessageChain;
 use crate::warn;
 use atri_ffi::ffi::{FFIEvent, ForFFI};
@@ -56,11 +56,11 @@ pub struct EventInner {
 
 impl EventInner {
     pub fn intercept(&self) {
-        (get_plugin_manager_vtb().event_intercept)(self.intercepted);
+        (get_vtb().event_intercept)(self.intercepted);
     }
 
     pub fn is_intercepted(&self) -> bool {
-        (get_plugin_manager_vtb().event_is_intercepted)(self.intercepted)
+        (get_vtb().event_is_intercepted)(self.intercepted)
     }
 }
 
@@ -76,7 +76,7 @@ pub struct GroupMessageEvent(EventInner);
 
 impl GroupMessageEvent {
     pub fn group(&self) -> Group {
-        let ma = (get_plugin_manager_vtb().group_message_event_get_group)(self.0.event.pointer);
+        let ma = (get_vtb().group_message_event_get_group)(self.0.event.pointer);
         Group(ma)
     }
 
@@ -85,13 +85,13 @@ impl GroupMessageEvent {
     }
 
     pub fn sender(&self) -> Member {
-        let ffi = (get_plugin_manager_vtb().group_message_event_get_sender)(self.event.pointer);
+        let ffi = (get_vtb().group_message_event_get_sender)(self.event.pointer);
 
         Member::from_ffi(ffi)
     }
 
     pub fn message(&self) -> MessageChain {
-        let ffi = (get_plugin_manager_vtb().group_message_event_get_message)(self.0.event.pointer);
+        let ffi = (get_vtb().group_message_event_get_message)(self.0.event.pointer);
         MessageChain::from_ffi(ffi)
     }
 
@@ -128,7 +128,7 @@ pub struct FriendMessageEvent(EventInner);
 
 impl FriendMessageEvent {
     pub fn friend(&self) -> Friend {
-        let ma = (get_plugin_manager_vtb().friend_message_event_get_friend)(self.event.pointer);
+        let ma = (get_vtb().friend_message_event_get_friend)(self.event.pointer);
         Friend(ma)
     }
 
@@ -137,7 +137,7 @@ impl FriendMessageEvent {
     }
 
     pub fn message(&self) -> MessageChain {
-        let ffi = (get_plugin_manager_vtb().friend_message_event_get_message)(self.event.pointer);
+        let ffi = (get_vtb().friend_message_event_get_message)(self.event.pointer);
         MessageChain::from_ffi(ffi)
     }
 

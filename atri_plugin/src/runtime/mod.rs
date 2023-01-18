@@ -6,6 +6,7 @@ use atri_ffi::Managed;
 use std::future::Future;
 use std::marker::PhantomData;
 use std::pin::Pin;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::task::{Context, Poll};
 
 mod manager;
@@ -68,4 +69,14 @@ where
     F: Future,
 {
     PluginRuntime::block_on(future)
+}
+
+static PANICKED: AtomicBool = AtomicBool::new(false);
+
+pub fn after_panic() {
+    PANICKED.store(true, Ordering::SeqCst);
+}
+
+pub fn is_panicked() -> bool {
+    PANICKED.load(Ordering::Relaxed)
 }
