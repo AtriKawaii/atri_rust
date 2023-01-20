@@ -1,9 +1,6 @@
-use crate::runtime::is_panicked;
 pub use atri_ffi::plugin::PluginInstance;
 use atri_ffi::plugin::PluginVTable;
 use atri_ffi::RustStr;
-use std::panic::catch_unwind;
-use std::ptr::null_mut;
 
 pub trait Plugin
 where
@@ -36,46 +33,23 @@ where
 /// 从已实现Plugin的结构体获取一个标准的PluginInstance
 pub fn __get_instance<P: Plugin>(name: &str) -> PluginInstance {
     extern "C" fn _new<P: Plugin>() -> *mut () {
-        if is_panicked() {
-            return null_mut();
-        }
-
-        catch_unwind(|| {
-            let b = Box::new(P::new());
-            Box::into_raw(b) as *mut ()
-        })
-        .unwrap_or(null_mut())
+        let b = Box::new(P::new());
+        Box::into_raw(b) as *mut ()
     }
 
     extern "C" fn _enable<P: Plugin>(ptr: *mut ()) {
-        if is_panicked() {
-            return;
-        }
-
-        let _ = catch_unwind(|| {
-            // Safety: Plugin is pinned by box
-            let p = unsafe { &mut *(ptr as *mut P) };
-            p.enable();
-        });
+        // Safety: Plugin is pinned by box
+        let p = unsafe { &mut *(ptr as *mut P) };
+        p.enable();
     }
 
     extern "C" fn _disable<P: Plugin>(ptr: *mut ()) {
-        if is_panicked() {
-            return;
-        }
-
-        let _ = catch_unwind(|| {
-            // Safety: Plugin is pinned by box
-            let p = unsafe { &mut *(ptr as *mut P) };
-            p.disable();
-        });
+        // Safety: Plugin is pinned by box
+        let p = unsafe { &mut *(ptr as *mut P) };
+        p.disable();
     }
 
     extern "C" fn _drop<T>(ptr: *mut ()) {
-        if is_panicked() {
-            return;
-        }
-
         drop(unsafe { Box::from_raw(ptr.cast::<T>()) })
     }
 

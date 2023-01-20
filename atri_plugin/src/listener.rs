@@ -1,13 +1,11 @@
 use crate::error;
 use crate::event::{Event, FromEvent};
 use crate::loader::get_vtb;
-use crate::runtime::is_panicked;
 use atri_ffi::closure::FFIFn;
 use atri_ffi::ffi::FFIEvent;
 use atri_ffi::future::FFIFuture;
 use atri_ffi::Managed;
 use std::future::Future;
-use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::time::Duration;
 
 pub struct Listener;
@@ -102,22 +100,12 @@ impl ListenerBuilder {
         Fu: Send + 'static,
     {
         let f = FFIFn::from_static(move |ffi| {
-            if is_panicked() {
-                return FFIFuture::from_static(async { false });
-            }
-
-            let handler = AssertUnwindSafe(&handler);
-            let r = catch_unwind(|| handler(Event::from_ffi(ffi)));
-
+            let fu = handler(Event::from_ffi(ffi));
             FFIFuture::from_static(async move {
-                if let Ok(fu) = r {
-                    crate::runtime::spawn(fu).await.unwrap_or_else(|e| {
-                        error!("监听器发生预料之外的错误, 停止监听: {}", e);
-                        false
-                    })
-                } else {
+                crate::runtime::spawn(fu).await.unwrap_or_else(|e| {
+                    error!("监听器发生预料之外的错误, 停止监听: {}", e);
                     false
-                }
+                })
             })
         });
 
