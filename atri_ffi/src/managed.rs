@@ -1,7 +1,6 @@
 use std::mem::ManuallyDrop;
 use std::ops::Deref;
-use std::ptr::{null, null_mut};
-use std::sync::Arc;
+use std::ptr::null_mut;
 
 #[repr(C)]
 pub struct Managed {
@@ -58,6 +57,9 @@ impl Managed {
         *Box::from_raw(ma.pointer as *mut T)
     }
 
+    /// Construct a managed null value
+    ///
+    /// Safety: This is unsafe because caller's behavior is unknown
     pub unsafe fn null() -> Self {
         extern "C" fn _drop_null(_: *mut ()) {}
 
@@ -132,54 +134,5 @@ impl Deref for ManagedCloneable {
 
     fn deref(&self) -> &Self::Target {
         &self.value
-    }
-}
-
-pub struct ManagedArc {
-    pub pointer: *const (),
-    pub drop: extern "C" fn(*const ()),
-}
-
-impl ManagedArc {
-    pub fn from_arc<T>(arc: Arc<T>) -> Self {
-        extern "C" fn _drop<B>(pointer: *const ()) {
-            drop(unsafe { Arc::from_raw(pointer.cast::<B>()) });
-        }
-
-        let ptr = Arc::into_raw(arc);
-
-        Self {
-            pointer: ptr.cast(),
-            drop: _drop::<T>,
-        }
-    }
-
-    /// Consume this managed arc value, turning it into arc value
-    ///
-    /// Safety: This is unsafe because we don't know the type
-    /// behind the raw pointer
-    pub unsafe fn into_arc<T>(self) -> Arc<T> {
-        let ma = ManuallyDrop::new(self);
-        Arc::<T>::from_raw(ma.pointer.cast())
-    }
-
-    pub fn as_ptr(&self) -> *const () {
-        self.pointer
-    }
-
-    /// Safety: use this as option
-    pub unsafe fn null() -> Self {
-        extern "C" fn _drop_null(_: *const ()) {}
-
-        Self {
-            pointer: null(),
-            drop: _drop_null,
-        }
-    }
-}
-
-impl Drop for ManagedArc {
-    fn drop(&mut self) {
-        (self.drop)(self.pointer);
     }
 }
