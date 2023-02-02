@@ -12,6 +12,9 @@ pub mod message;
 pub mod plugin;
 pub use managed::*;
 
+pub type Handle = *const ();
+pub type PHandle = *const Handle;
+
 #[repr(C)]
 pub struct RustString {
     pub ptr: *mut u8,
