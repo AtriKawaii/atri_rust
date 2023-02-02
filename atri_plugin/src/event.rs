@@ -75,12 +75,12 @@ pub struct ClientLoginEvent(EventInner);
 pub struct GroupMessageEvent(EventInner);
 
 impl GroupMessageEvent {
-    pub fn group(&self) -> Group {
-        let ma = (get_vtb().group_message_event_get_group)(self.0.event.pointer);
-        Group(ma)
+    pub fn group(&self) -> &Group {
+        let phandle = (get_vtb().group_message_event_get_group)(self.0.event.pointer);
+        unsafe { std::mem::transmute(phandle) }
     }
 
-    pub fn client(&self) -> Client {
+    pub fn client(&self) -> &Client {
         self.group().client()
     }
 
@@ -127,12 +127,12 @@ impl FromEvent for GroupMessageEvent {
 pub struct FriendMessageEvent(EventInner);
 
 impl FriendMessageEvent {
-    pub fn friend(&self) -> Friend {
-        let ma = (get_vtb().friend_message_event_get_friend)(self.event.pointer);
-        Friend(ma)
+    pub fn friend(&self) -> &Friend {
+        let phandle = (get_vtb().friend_message_event_get_friend)(self.event.pointer);
+        unsafe { std::mem::transmute(phandle) }
     }
 
-    pub fn client(&self) -> Client {
+    pub fn client(&self) -> &Client {
         self.friend().client()
     }
 
@@ -184,6 +184,23 @@ macro_rules! event_inner_impl {
         }
         )*
     };
+}
+
+pub enum MessageEvent {
+    Friend(FriendMessageEvent),
+    Group(GroupMessageEvent),
+}
+
+impl FromEvent for MessageEvent {
+    fn from_event(e: Event) -> Option<Self> {
+        let e = match e {
+            Event::FriendMessage(e) => Self::Friend(e),
+            Event::GroupMessage(e) => Self::Group(e),
+            _ => return None,
+        };
+
+        Some(e)
+    }
 }
 
 event_inner_impl! {

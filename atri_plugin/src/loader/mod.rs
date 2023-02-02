@@ -5,7 +5,9 @@ use atri_ffi::ffi::{AtriManager, FFIEvent};
 use atri_ffi::future::FFIFuture;
 use atri_ffi::message::forward::FFIForwardNode;
 use atri_ffi::message::{FFIMessageChain, FFIMessageReceipt};
-use atri_ffi::{FFIOption, Managed, ManagedCloneable, RustStr, RustString, RustVec};
+use atri_ffi::{
+    FFIOption, Handle, Managed, ManagedCloneable, PHandle, RustStr, RustString, RustVec,
+};
 use std::mem::MaybeUninit;
 
 pub struct AtriVTable {
@@ -23,59 +25,60 @@ pub struct AtriVTable {
     pub event_intercept: extern "C" fn(*const ()),
     pub event_is_intercepted: extern "C" fn(*const ()) -> bool,
 
-    pub client_get_id: extern "C" fn(*const ()) -> i64,
-    pub client_get_nickname: extern "C" fn(*const ()) -> RustString,
-    pub client_get_list: extern "C" fn() -> RustVec<ManagedCloneable>,
-    pub find_client: extern "C" fn(i64) -> ManagedCloneable,
-    pub client_find_group: extern "C" fn(*const (), i64) -> ManagedCloneable,
-    pub client_find_friend: extern "C" fn(*const (), i64) -> ManagedCloneable,
-    pub client_get_groups: extern "C" fn(*const ()) -> RustVec<ManagedCloneable>,
-    pub client_get_friends: extern "C" fn(*const ()) -> RustVec<ManagedCloneable>,
+    pub client_get_id: extern "C" fn(Handle) -> i64,
+    pub client_get_nickname: extern "C" fn(Handle) -> RustString,
+    pub client_get_list: extern "C" fn() -> RustVec<Handle>,
+    pub find_client: extern "C" fn(i64) -> Handle,
+    pub client_find_group: extern "C" fn(Handle, i64) -> Handle,
+    pub client_find_friend: extern "C" fn(Handle, i64) -> Handle,
+    pub client_get_groups: extern "C" fn(Handle) -> RustVec<Handle>,
+    pub client_get_friends: extern "C" fn(Handle) -> RustVec<Handle>,
+    pub client_clone: extern "C" fn(Handle) -> Handle,
+    pub client_drop: extern "C" fn(Handle),
 
-    pub group_message_event_get_group: extern "C" fn(event: *const ()) -> ManagedCloneable,
+    pub group_message_event_get_group: extern "C" fn(event: *const ()) -> PHandle,
     pub group_message_event_get_message: extern "C" fn(event: *const ()) -> FFIMessageChain,
     pub group_message_event_get_sender: extern "C" fn(event: *const ()) -> FFIMember,
 
-    pub group_get_id: extern "C" fn(group: *const ()) -> i64,
-    pub group_get_name: extern "C" fn(group: *const ()) -> RustStr,
-    pub group_get_client: extern "C" fn(group: *const ()) -> ManagedCloneable,
-    pub group_get_members: extern "C" fn(group: *const ()) -> FFIFuture<RustVec<ManagedCloneable>>,
-    pub group_find_member: extern "C" fn(group: *const (), id: i64) -> FFIFuture<ManagedCloneable>,
+    pub group_get_id: extern "C" fn(Handle) -> i64,
+    pub group_get_name: extern "C" fn(Handle) -> RustStr,
+    pub group_get_client: extern "C" fn(Handle) -> PHandle,
+    pub group_get_members: extern "C" fn(Handle) -> FFIFuture<RustVec<ManagedCloneable>>,
+    pub group_find_member: extern "C" fn(Handle, i64) -> FFIFuture<ManagedCloneable>,
     pub group_send_message: extern "C" fn(
-        group: *const (),
+        group: Handle,
         chain: FFIMessageChain,
     ) -> FFIFuture<FFIResult<FFIMessageReceipt>>,
-    pub group_upload_image: extern "C" fn(
-        group: *const (),
-        data: RustVec<u8>,
-    ) -> FFIFuture<FFIResult<ManagedCloneable>>,
-    pub group_quit: extern "C" fn(group: *const ()) -> FFIFuture<bool>,
-    pub group_change_name:
-        extern "C" fn(group: *const (), name: RustStr) -> FFIFuture<FFIResult<()>>,
+    pub group_upload_image:
+        extern "C" fn(group: Handle, data: RustVec<u8>) -> FFIFuture<FFIResult<ManagedCloneable>>,
+    pub group_quit: extern "C" fn(group: Handle) -> FFIFuture<bool>,
+    pub group_change_name: extern "C" fn(group: Handle, name: RustStr) -> FFIFuture<FFIResult<()>>,
     pub group_send_forward_message: extern "C" fn(
         group: *const (),
         msg: RustVec<FFIForwardNode>,
     ) -> FFIFuture<FFIResult<FFIMessageReceipt>>,
-    pub group_invite: extern "C" fn(group: *const (), id: i64) -> FFIFuture<FFIResult<()>>,
+    pub group_invite: extern "C" fn(group: Handle, id: i64) -> FFIFuture<FFIResult<()>>,
+    pub group_clone: extern "C" fn(Handle) -> Handle,
+    pub group_drop: extern "C" fn(Handle),
 
-    pub friend_message_event_get_friend: extern "C" fn(event: *const ()) -> ManagedCloneable,
+    pub friend_message_event_get_friend: extern "C" fn(event: *const ()) -> PHandle,
     pub friend_message_event_get_message: extern "C" fn(event: *const ()) -> FFIMessageChain,
-    pub friend_get_id: extern "C" fn(friend: *const ()) -> i64,
-    pub friend_get_nickname: extern "C" fn(friend: *const ()) -> RustStr,
-    pub friend_get_client: extern "C" fn(friend: *const ()) -> ManagedCloneable,
+    pub friend_get_id: extern "C" fn(Handle) -> i64,
+    pub friend_get_nickname: extern "C" fn(Handle) -> RustStr,
+    pub friend_get_client: extern "C" fn(Handle) -> PHandle,
     pub friend_send_message: extern "C" fn(
-        friend: *const (),
+        friend: Handle,
         chain: FFIMessageChain,
     ) -> FFIFuture<FFIResult<FFIMessageReceipt>>,
-    pub friend_upload_image: extern "C" fn(
-        friend: *const (),
-        img: RustVec<u8>,
-    ) -> FFIFuture<FFIResult<ManagedCloneable>>,
+    pub friend_upload_image:
+        extern "C" fn(friend: Handle, img: RustVec<u8>) -> FFIFuture<FFIResult<ManagedCloneable>>,
+    pub friend_clone: extern "C" fn(Handle) -> Handle,
+    pub friend_drop: extern "C" fn(Handle),
 
     pub named_member_get_id: extern "C" fn(named: *const ()) -> i64,
     pub named_member_get_nickname: extern "C" fn(named: *const ()) -> RustStr,
     pub named_member_get_card_name: extern "C" fn(named: *const ()) -> RustStr,
-    pub named_member_get_group: extern "C" fn(named: *const ()) -> ManagedCloneable,
+    pub named_member_get_group: extern "C" fn(named: *const ()) -> PHandle,
     pub named_member_change_card_name:
         extern "C" fn(named: *const (), card: RustStr) -> FFIFuture<FFIResult<()>>,
 
@@ -129,6 +132,8 @@ unsafe extern "C" fn atri_manager_init(manager: AtriManager) {
         client_find_friend => 305,
         client_get_groups => 306,
         client_get_friends => 307,
+        client_clone => 320,
+        client_drop => 321,
 
         group_get_id => 400,
         group_get_name => 401,
@@ -143,11 +148,17 @@ unsafe extern "C" fn atri_manager_init(manager: AtriManager) {
         group_send_forward_message => 410,
         group_invite => 411,
 
+        group_clone => 420,
+        group_drop => 421,
+
         friend_get_id => 500,
         friend_get_nickname => 501,
         friend_get_client => 502,
         friend_send_message => 503,
         friend_upload_image => 504,
+
+        friend_clone => 520,
+        friend_drop => 521,
 
         named_member_get_id => 600,
         named_member_get_nickname => 601,

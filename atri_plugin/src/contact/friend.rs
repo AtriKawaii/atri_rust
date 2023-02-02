@@ -5,26 +5,25 @@ use crate::message::image::Image;
 use crate::message::meta::MessageReceipt;
 use crate::message::MessageChain;
 use atri_ffi::ffi::ForFFI;
-use atri_ffi::{ManagedCloneable, RustVec};
+use atri_ffi::{Handle, RustVec};
 use std::fmt::{Display, Formatter};
 
-#[derive(Clone)]
-pub struct Friend(pub(crate) ManagedCloneable);
+pub struct Friend(pub(crate) Handle);
 
 impl Friend {
     pub fn id(&self) -> i64 {
-        (get_vtb().friend_get_id)(self.0.pointer)
+        (get_vtb().friend_get_id)(self.0)
     }
 
     pub fn nickname(&self) -> &str {
-        let rs = (get_vtb().friend_get_nickname)(self.0.pointer);
+        let rs = (get_vtb().friend_get_nickname)(self.0);
 
         rs.as_str()
     }
 
-    pub fn client(&self) -> Client {
-        let ma = (get_vtb().friend_get_client)(self.0.pointer);
-        Client(ma)
+    pub fn client(&self) -> &Client {
+        let ma = (get_vtb().friend_get_client)(self.0);
+        unsafe { std::mem::transmute(ma) }
     }
 
     pub async fn send_message<M: Into<MessageChain>>(
@@ -33,7 +32,7 @@ impl Friend {
     ) -> Result<MessageReceipt, AtriError> {
         let fu = {
             let ffi = chain.into().into_ffi();
-            (get_vtb().friend_send_message)(self.0.pointer, ffi)
+            (get_vtb().friend_send_message)(self.0, ffi)
         };
 
         let result = Result::from(crate::runtime::spawn(fu).await.unwrap());
@@ -44,7 +43,7 @@ impl Friend {
     }
 
     pub async fn upload_image(&self, img: Vec<u8>) -> Result<Image, AtriError> {
-        let fu = { (get_vtb().friend_upload_image)(self.0.pointer, RustVec::from(img)) };
+        let fu = { (get_vtb().friend_upload_image)(self.0, RustVec::from(img)) };
         let result = crate::runtime::spawn(fu).await.unwrap();
 
         match Result::from(result) {
@@ -53,6 +52,21 @@ impl Friend {
         }
     }
 }
+
+impl Clone for Friend {
+    fn clone(&self) -> Self {
+        Self((get_vtb().friend_clone)(self.0))
+    }
+}
+
+impl Drop for Friend {
+    fn drop(&mut self) {
+        (get_vtb().friend_drop)(self.0);
+    }
+}
+
+unsafe impl Send for Friend {}
+unsafe impl Sync for Friend {}
 
 impl Display for Friend {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
