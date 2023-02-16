@@ -25,9 +25,9 @@ impl Group {
         (get_vtb().group_get_id)(self.0)
     }
 
-    pub fn client(&self) -> &Client {
-        let phandle = (get_vtb().group_get_client)(self.0);
-        unsafe { std::mem::transmute(phandle) }
+    pub fn client(&self) -> Client {
+        let handle = (get_vtb().group_get_client)(self.0);
+        Client(handle)
     }
 
     pub fn name(&self) -> &str {

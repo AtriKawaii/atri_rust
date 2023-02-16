@@ -42,7 +42,7 @@ pub struct AtriVTable {
 
     pub group_get_id: extern "C" fn(Handle) -> i64,
     pub group_get_name: extern "C" fn(Handle) -> RustStr,
-    pub group_get_client: extern "C" fn(Handle) -> PHandle,
+    pub group_get_client: extern "C" fn(Handle) -> Handle,
     pub group_get_members: extern "C" fn(Handle) -> FFIFuture<RustVec<ManagedCloneable>>,
     pub group_find_member: extern "C" fn(Handle, i64) -> FFIFuture<ManagedCloneable>,
     pub group_send_message: extern "C" fn(
@@ -65,7 +65,7 @@ pub struct AtriVTable {
     pub friend_message_event_get_message: extern "C" fn(event: *const ()) -> FFIMessageChain,
     pub friend_get_id: extern "C" fn(Handle) -> i64,
     pub friend_get_nickname: extern "C" fn(Handle) -> RustStr,
-    pub friend_get_client: extern "C" fn(Handle) -> PHandle,
+    pub friend_get_client: extern "C" fn(Handle) -> Handle,
     pub friend_send_message: extern "C" fn(
         friend: Handle,
         chain: FFIMessageChain,
@@ -78,7 +78,7 @@ pub struct AtriVTable {
     pub named_member_get_id: extern "C" fn(named: *const ()) -> i64,
     pub named_member_get_nickname: extern "C" fn(named: *const ()) -> RustStr,
     pub named_member_get_card_name: extern "C" fn(named: *const ()) -> RustStr,
-    pub named_member_get_group: extern "C" fn(named: *const ()) -> PHandle,
+    pub named_member_get_group: extern "C" fn(named: *const ()) -> Handle,
     pub named_member_change_card_name:
         extern "C" fn(named: *const (), card: RustStr) -> FFIFuture<FFIResult<()>>,
 

@@ -16,28 +16,41 @@ pub enum Event {
     ClientLogin(ClientLoginEvent),
     GroupMessage(GroupMessageEvent),
     FriendMessage(FriendMessageEvent),
+    NewFriend(NewFriendEvent),
+    DeleteFriend(DeleteFriendEvent),
     Unknown { raw_tag: u8, inner: EventInner },
 }
 
 impl Event {
     pub fn from_ffi(ffi: FFIEvent) -> Self {
+        macro_rules! event_matches {
+            (type: $t:expr, inner: $in:expr; $($nr:expr => ($e:ident,$inner:ident));* $(;)?) => {
+                match $t {
+                    $($nr => Self::$e($inner($in)),)*
+                    or => {
+                        if or != 255 {
+                           warn!("接受了一个未知事件, tag={}", or);
+                        }
+
+                        Self::Unknown { raw_tag: or, inner: $in }
+                    }
+                }
+            };
+        }
+
         let (t, intercepted, m) = ffi.get();
         let inner = EventInner {
             intercepted,
             event: m,
         };
 
-        match t {
-            0 => Self::ClientLogin(ClientLoginEvent(inner)),
-            1 => Self::GroupMessage(GroupMessageEvent(inner)),
-            2 => Self::FriendMessage(FriendMessageEvent(inner)),
-            or => {
-                if or != 255 {
-                    warn!("接受了一个未知事件, tag={}", or);
-                }
-
-                Self::Unknown { raw_tag: or, inner }
-            }
+        event_matches! {
+            type: t, inner: inner;
+            0 => (ClientLogin, ClientLoginEvent);
+            1 => (GroupMessage, GroupMessageEvent);
+            2 => (FriendMessage, FriendMessageEvent);
+            3 => (NewFriend, NewFriendEvent);
+            4 => (DeleteFriend, DeleteFriendEvent);
         }
     }
 }
@@ -80,7 +93,7 @@ impl GroupMessageEvent {
         unsafe { std::mem::transmute(phandle) }
     }
 
-    pub fn client(&self) -> &Client {
+    pub fn client(&self) -> Client {
         self.group().client()
     }
 
@@ -132,7 +145,7 @@ impl FriendMessageEvent {
         unsafe { std::mem::transmute(phandle) }
     }
 
-    pub fn client(&self) -> &Client {
+    pub fn client(&self) -> Client {
         self.friend().client()
     }
 
@@ -157,6 +170,16 @@ impl FriendMessageEvent {
         .await
     }
 }
+
+#[derive(Clone)]
+pub struct NewFriendEvent(EventInner);
+
+impl NewFriendEvent {}
+
+#[derive(Clone)]
+pub struct DeleteFriendEvent(EventInner);
+
+impl DeleteFriendEvent {}
 
 impl FromEvent for FriendMessageEvent {
     fn from_event(e: Event) -> Option<Self> {

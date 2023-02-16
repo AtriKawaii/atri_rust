@@ -51,12 +51,12 @@ impl NamedMember {
         rs.as_str()
     }
 
-    pub fn group(&self) -> &Group {
-        let phandle = (get_vtb().named_member_get_group)(self.0.pointer);
-        unsafe { std::mem::transmute(phandle) }
+    pub fn group(&self) -> Group {
+        let handle = (get_vtb().named_member_get_group)(self.0.pointer);
+        Group(handle)
     }
 
-    pub fn client(&self) -> &Client {
+    pub fn client(&self) -> Client {
         self.group().client()
     }
 

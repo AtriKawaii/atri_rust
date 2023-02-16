@@ -21,9 +21,9 @@ impl Friend {
         rs.as_str()
     }
 
-    pub fn client(&self) -> &Client {
+    pub fn client(&self) -> Client {
         let ma = (get_vtb().friend_get_client)(self.0);
-        unsafe { std::mem::transmute(ma) }
+        Client(ma)
     }
 
     pub async fn send_message<M: Into<MessageChain>>(
